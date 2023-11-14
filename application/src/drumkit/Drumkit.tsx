@@ -50,6 +50,8 @@ interface DrumkitGridProps {
 
 function DrumkitGrid({ dk, instruments }: Readonly<DrumkitGridProps>) {
 
+    // array of instrument ids, sorted from lowest to highest
+    // map each instrument id to a DrumkitRow component for that instrument
     let instrumentIds = Array.from(instruments.keys()).sort((i, j) => i - j);
 
     return (
@@ -71,18 +73,23 @@ interface DrumkitRowProps {
 }
 
 function DrumkitRow({ dk, instrument }: Readonly<DrumkitRowProps>) {
+
+    // array 0 - tickCount-1
+    // map each tick to a DrumkitCell component for that tick
+    let ticks = Array(dk.loop.tickCount).fill(0).map((_, i) => i);
+
     return (
         <div>
             <p>{instrument.displayName}</p>
             <div>
-                {Array(dk.loop.tickCount).fill(0).map((_, i) => {
-                    return <DrumkitSlot
-                        key={i}
+                {ticks.map((tick) =>
+                    <DrumkitCell
+                        key={tick}
                         onCheckedChanged={(checked) =>
-                             dk.set(instrument.id, dk.loop.toBeat(i), checked ? 1 : 0)
+                             dk.set(instrument.id, dk.loop.toBeat(tick), checked ? 1 : 0)
                         }
                     />
-                })}
+                )}
             </div>
         </div>
     )
@@ -90,11 +97,11 @@ function DrumkitRow({ dk, instrument }: Readonly<DrumkitRowProps>) {
 
 // TODO: contemplate whether beat info is required for the specific slot
 // maybe use beat to style column inside of loop?
-interface DrumkitSlotProps {
+interface DrumkitCellProps {
     onCheckedChanged: (checked: boolean) => void;
 }
 
-function DrumkitSlot({ onCheckedChanged }: Readonly<DrumkitSlotProps>) {
+function DrumkitCell({ onCheckedChanged }: Readonly<DrumkitCellProps>) {
     const [checked, setChecked] = React.useState(false);
 
     const handleChange = () => {
