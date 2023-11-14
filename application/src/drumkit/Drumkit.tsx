@@ -1,6 +1,19 @@
+/**
+ * @fileoverview Defines the Drumkit component which just runs some hardcoded
+ * data in a loop for a few seconds.
+ */
+
 import { DrumkitLogic } from './drumkit-logic'
 import { Beat, Loop } from './loop';
 
+/**
+ * Defines the Drumkit component which consists of a button which, when
+ * clicked, runs some hardcoded drumkit data in a loop for a few seconds.
+ *
+ * @author Alex Mandelias
+ *
+ * @sinve v0.0.1
+ */
 function Drumkit() {
     return (
         <button onClick={start}>Click to start (open the console to see results (F12))</button>

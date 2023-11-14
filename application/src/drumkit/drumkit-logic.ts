@@ -1,6 +1,20 @@
+/**
+ * @fileoverview Defines the {@link DrumkitLogic} class, which encapsulates the
+ * logic required for a drumkit to function, which includes
+ */
+
 import { INSTRUMENTS } from './instrument'
 import { Beat, Loop } from './loop'
 
+/**
+ * Encapsulates the data and the functionality of a drum kit. The data consists
+ * of information about whether each instrument will play each tick. This data
+ * is then used to play the drumkit, as defiend by the loop.
+ *
+ * @author Alex Mandelias
+ *
+ * @since v0.0.1
+ */
 class DrumkitLogic {
 
     private readonly loop: Loop;
@@ -28,6 +42,14 @@ class DrumkitLogic {
         this.data.get(instrumentId)![tick] = value;
     }
 
+    /**
+     * Defines the player class which is responsible for playing the drumkit's
+     * data in the context of the loop defined by the drumkit.
+     *
+     * @author Alex Mandelias
+     *
+     * @since v0.0.1
+     */
     private readonly player = new class {
 
         constructor(

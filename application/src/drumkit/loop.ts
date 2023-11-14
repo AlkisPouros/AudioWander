@@ -1,3 +1,17 @@
+/**
+ * @fileoverview Defines the {@link Beat} and {@link Loop} classes, which work
+ * together to fully define a drump loop and a singular moment in that loop.
+ */
+
+/**
+ * Dataclass for a Beat, a moment inside a drump loop. Each Beat is identified
+ * by its bar number, its beat in the bar, and the subdivision of the beat. All
+ * fields are 1-indexed meaning that bar 1 is the first bar.
+ *
+ * @author Alex Mandelias
+ *
+ * @since v0.0.1
+ */
 class Beat {
     constructor(
         readonly bar: number,
@@ -6,6 +20,16 @@ class Beat {
     ) {}
 }
 
+/**
+ * Encapsulates the time information of drump loop. A loop is defined by its
+ * speed (bpm) and the number of bars, beats and subdivisions thereof. Time
+ * passes in ticks (one subdivision) and can be converted to meaningful and
+ * rich Beat information, and vice versa.
+ *
+ * @author Alex Mandelias
+ *
+ * @since v0.0.1
+ */
 class Loop {
 
     private beats_per_minute!: number;
@@ -22,12 +46,41 @@ class Loop {
         this.subdivisions = subdivisions;
     }
 
+    /**
+     * Converts the given Beat to its corresponding tick in this drump loop.
+     * The tick is 0-indexed, meaning that Beat(1, 1, 1) corresponds to tick 1.
+     *
+     * A tick counts how many subdivisions have passed since the loop's
+     * beginning. For example, a loop with 4 bars, 3 beats and 2 subdivisions
+     * has a total of 4 * 3 * 2 = 24 ticks.
+     *
+     * @param {Beat} beat the Beat to convert
+     * @returns {number} the tick the beat corresponds to in this drump loop
+     *
+     * @see {@link Beat}
+     *
+     * @since v0.0.1
+     */
     toTick(beat: Beat): number {
         // beat is 1-indexed, return value (tick) is 0-indexed
         return this.beats * (beat.bar - 1) + this.subdivisions * (beat.beat - 1)
             + beat.subdivision - 1;
     }
 
+    /**
+     * Converts the given tick to its corresponding Beat in this drump loop.
+     * The Beat is 1-indexed, meaning that tick 0 corresponds to Beat(1, 1, 1).
+     *
+     * The Beat contains rich information about the position of the music
+     * inside the loop.
+     *
+     * @param {number} tick the tick to convert
+     * @returns {Beat} the beat the tick corresponds to in this drump loop
+     *
+     * @see {@link Beat}
+     *
+     * @since v0.0.1
+     */
     toBeat(tick: number): Beat {
         // tick is 0-indexed, return value (beat) is 1-indexed
 
@@ -88,6 +141,14 @@ class Loop {
         this.subdivisison_count = value;
     }
 
+    /**
+     * Defines constraints for the Loop's fields, and provides methods to
+     * easily check whether value given is within said constraints.
+     *
+     * @author Alex Mandelias
+     *
+     * @since v0.0.1
+     */
     static Constraints = new class {
 
         // constraints are arbitrary, subject to change in the future as a
@@ -97,33 +158,100 @@ class Loop {
         // -> max_bpm = 100 bps = 6000 bpm
         // -> max_bpm * maxsubdivisison_count <= 6000
 
+        /**
+         * Minimum BPM
+         *
+         * @since v0.0.1
+         */
         readonly MIN_BPM = 1;
+
+        /**
+         * Maximum BPM
+         *
+         * @since v0.0.1
+         */
         readonly MAX_BPM = 200;
 
+        /**
+         * Minimum bar count
+         *
+         * @since v0.0.1
+         */
         readonly MIN_BAR_COUNT = 1;
+
+        /**
+         * Maximum bar count
+         *
+         * @since v0.0.1
+         */
         readonly MAX_BAR_COUNT = 4;
 
+        /**
+         * Minimum beat count
+         *
+         * @since v0.0.1
+         */
         readonly MIN_BEAT_COUNT = 1;
+
+        /**
+         * Maximum beat count
+         *
+         * @since v0.0.1
+         */
         readonly MAX_BEAT_COUNT = 4;
 
+        /**
+         * Minimum subdivision count
+         *
+         * @since v0.0.1
+         */
         readonly MIN_SUBDIVISION_COUNT = 1;
+
+        /**
+         * Maximum subdivision count
+         *
+         * @since v0.0.1
+         */
         readonly MAX_SUBDIVISION_COUNT = 3;
 
+        /**
+         * Checks whether the given BPM is within the constraints of this class.
+         *
+         * @since v0.0.1
+         */
         checkBpm(bpm: number): boolean {
             return bpm >= Loop.Constraints.MIN_BPM
                 && bpm <= Loop.Constraints.MAX_BPM;
         }
 
+        /**
+         * Checks whether the given bar count is within the constraints of this
+         * class.
+         *
+         * @since v0.0.1
+         */
         checkBars(bars: number): boolean {
             return bars >= Loop.Constraints.MIN_BAR_COUNT
                 && bars <= Loop.Constraints.MAX_BAR_COUNT;
         }
 
+        /**
+         * Checks whether the given beat count is within the constraints of
+         * this class.
+         *
+         * @since v0.0.1
+         */
         checkBeats(beats: number): boolean {
             return beats >= Loop.Constraints.MIN_BEAT_COUNT
                 && beats <= Loop.Constraints.MAX_BEAT_COUNT;
         }
 
+        /**
+         * Checks whether the given subdivision count is within the constraints
+         * of this class.
+         *
+         * @since v0.0.1
+         */
         checkSubdivisions(subdivisions: number): boolean {
             return subdivisions >= Loop.Constraints.MIN_SUBDIVISION_COUNT
                 && subdivisions <= Loop.Constraints.MAX_SUBDIVISION_COUNT;
