@@ -5,7 +5,8 @@
 
 import React from 'react';
 import { DrumkitLogic } from './drumkit-logic'
-import { Beat, Loop } from './loop';
+import { Loop } from './loop';
+import { INSTRUMENTS, Instrument } from './instrument';
 
 /**
  * Defines the Drumkit component which consists of a button which, when
@@ -16,33 +17,59 @@ import { Beat, Loop } from './loop';
  * @sinve v0.0.1
  */
 function Drumkit() {
+
+    let loop = new Loop(120, 2, 3, 1);
+
+    const dk = new DrumkitLogic(loop);
+
+    const drum = INSTRUMENTS.get(1)!;
+
     return (
         <div>
-            <DrumkitSlot
-                instrumentId={1}
-                beat={new Beat(1, 2, 3)}
-                onCheckedChanged={(instrumentId: number, beat: Beat, checked: boolean) =>
-                    console.log(`Switched instrument ${instrumentId} to ${checked}`
-                    + ` on beat ${beat.bar} ${beat.beat} ${beat.subdivision}}`)}
-            ></DrumkitSlot>
+            <DrumkitRow
+                dk={dk}
+                instrument={drum}
+            />
         </div>
     );
 }
 
-
-interface DrumkitSlotProps {
-    instrumentId: number;
-    beat: Beat;
-    onCheckedChanged: (instrumentId: number, beat: Beat, checked: boolean) => void;
+interface DrumkitRowProps {
+    dk: DrumkitLogic;
+    instrument: Instrument;
 }
 
-function DrumkitSlot({ instrumentId, beat, onCheckedChanged }: Readonly<DrumkitSlotProps>) {
+function DrumkitRow({ dk, instrument }: Readonly<DrumkitRowProps>) {
+    return (
+        <div>
+            <p>{instrument.displayName}</p>
+            <div>
+                {Array(dk.loop.tickCount).fill(0).map((_, i) => {
+                    let beat = dk.loop.toBeat(i);
+                    return <DrumkitSlot
+                        key={i}
+                        onCheckedChanged={(checked) => console.log(`Switched instrument ${instrument.id}`
+                        + ` to ${checked} on beat ${beat.bar} ${beat.beat} ${beat.subdivision}}`)}
+                    />
+                })}
+            </div>
+        </div>
+    )
+}
+
+// TODO: contemplate whether beat info is required for the specific slot
+// maybe use beat to style column inside of loop?
+interface DrumkitSlotProps {
+    onCheckedChanged: (checked: boolean) => void;
+}
+
+function DrumkitSlot({ onCheckedChanged }: Readonly<DrumkitSlotProps>) {
     const [checked, setChecked] = React.useState(false);
 
     const handleChange = () => {
         let newChecked = !checked;
         setChecked(newChecked);
-        onCheckedChanged(instrumentId, beat, newChecked);
+        onCheckedChanged(newChecked);
     };
 
     return (
@@ -52,6 +79,6 @@ function DrumkitSlot({ instrumentId, beat, onCheckedChanged }: Readonly<DrumkitS
             onChange={handleChange}
         />
     );
-};
+}
 
 export { Drumkit };

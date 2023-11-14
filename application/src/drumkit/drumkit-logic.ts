@@ -17,7 +17,7 @@ import { Beat, Loop } from './loop'
  */
 class DrumkitLogic {
 
-    private readonly loop: Loop;
+    readonly loop: Loop;
 
     // map: instrument id -> array of length `tickCount`, one vlaue for each tick
     private readonly data: Map<number, Array<number>>;
