@@ -3,6 +3,7 @@
  * data in a loop for a few seconds.
  */
 
+import React from 'react';
 import { DrumkitLogic } from './drumkit-logic'
 import { Beat, Loop } from './loop';
 
@@ -16,27 +17,41 @@ import { Beat, Loop } from './loop';
  */
 function Drumkit() {
     return (
-        <button onClick={start}>Click to start (open the console to see results (F12))</button>
+        <div>
+            <DrumkitSlot
+                instrumentId={1}
+                beat={new Beat(1, 2, 3)}
+                onCheckedChanged={(instrumentId: number, beat: Beat, checked: boolean) =>
+                    console.log(`Switched instrument ${instrumentId} to ${checked}`
+                    + ` on beat ${beat.bar} ${beat.beat} ${beat.subdivision}}`)}
+            ></DrumkitSlot>
+        </div>
     );
 }
 
-function start() {
-    const dk = new DrumkitLogic(new Loop(120, 2, 3));
 
-    // [0].forEach(i => this.data.get(1)![i] = 1);
-    dk.set(1, new Beat(1, 1, 1), 1);
-
-    // [3].forEach(i => dk.data.get(2)![i] = 1);
-    dk.set(2, new Beat(2, 1, 1), 1);
-
-    // [1, 2, 4, 5].forEach(i => dk.data.get(3)![i] = 1);
-    dk.set(3, new Beat(1, 2, 1), 1);
-    dk.set(3, new Beat(1, 3, 1), 1);
-    dk.set(3, new Beat(2, 2, 1), 1);
-    dk.set(3, new Beat(2, 3, 1), 1);
-
-    dk.start();
-    setTimeout(() => dk.stop(), 10 * 1000)
+interface DrumkitSlotProps {
+    instrumentId: number;
+    beat: Beat;
+    onCheckedChanged: (instrumentId: number, beat: Beat, checked: boolean) => void;
 }
+
+function DrumkitSlot({ instrumentId, beat, onCheckedChanged }: Readonly<DrumkitSlotProps>) {
+    const [checked, setChecked] = React.useState(false);
+
+    const handleChange = () => {
+        let newChecked = !checked;
+        setChecked(newChecked);
+        onCheckedChanged(instrumentId, beat, newChecked);
+    };
+
+    return (
+        <input
+            type="checkbox"
+            checked={checked}
+            onChange={handleChange}
+        />
+    );
+};
 
 export { Drumkit };
