@@ -22,16 +22,37 @@ function Drumkit() {
 
     const dk = new DrumkitLogic(loop);
 
-    const drum = INSTRUMENTS.get(1)!;
 
     return (
         <div>
-            <DrumkitRow
+            <DrumkitGrid
                 dk={dk}
-                instrument={drum}
+                instruments={INSTRUMENTS}
             />
         </div>
     );
+}
+
+interface DrumkitGridProps {
+    dk: DrumkitLogic;
+    instruments: Map<number, Instrument>;
+}
+
+function DrumkitGrid({ dk, instruments }: Readonly<DrumkitGridProps>) {
+
+    let instrumentIds = Array.from(instruments.keys()).sort((i, j) => i - j);
+
+    return (
+        <div>
+            {instrumentIds.map((id) =>
+                <DrumkitRow
+                    key={id}
+                    dk={dk}
+                    instrument={instruments.get(id)!}
+                />
+            )}
+        </div>
+    )
 }
 
 interface DrumkitRowProps {
