@@ -22,9 +22,19 @@ function Drumkit() {
 
     const dk = new DrumkitLogic(loop);
 
+    const start = () => {
+        dk.start();
+    }
+
+    const stop = () => {
+        dk.stop();
+    }
 
     return (
         <div>
+            <button onClick={start}>Click to start</button>
+            <button onClick={stop}>Click to stop</button>
+            <p>Open the console to see results (F12)</p>
             <DrumkitGrid
                 dk={dk}
                 instruments={INSTRUMENTS}
@@ -66,11 +76,11 @@ function DrumkitRow({ dk, instrument }: Readonly<DrumkitRowProps>) {
             <p>{instrument.displayName}</p>
             <div>
                 {Array(dk.loop.tickCount).fill(0).map((_, i) => {
-                    let beat = dk.loop.toBeat(i);
                     return <DrumkitSlot
                         key={i}
-                        onCheckedChanged={(checked) => console.log(`Switched instrument ${instrument.id}`
-                        + ` to ${checked} on beat ${beat.bar} ${beat.beat} ${beat.subdivision}}`)}
+                        onCheckedChanged={(checked) =>
+                             dk.set(instrument.id, dk.loop.toBeat(i), checked ? 1 : 0)
+                        }
                     />
                 })}
             </div>
