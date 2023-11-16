@@ -4,8 +4,8 @@
  */
 
 import React from 'react';
-import { DrumkitLogic } from './drumkit-logic'
-import { Loop } from './loop';
+import { Player } from './drumkit-logic'
+import { Beat, Loop, LoopMetadata } from './loop';
 import { INSTRUMENTS, Instrument } from './instrument';
 
 /**
@@ -18,17 +18,20 @@ import { INSTRUMENTS, Instrument } from './instrument';
  */
 function Drumkit() {
 
-    let loop = new Loop(120, 2, 3, 1);
+    let loop = new Loop(new LoopMetadata(120, 2, 3, 1));
 
-    const dk = new DrumkitLogic(loop);
+    const player = new Player(loop);
 
     const start = () => {
-        dk.start();
+        player.start();
     }
 
     const stop = () => {
-        dk.stop();
+        player.stop();
     }
+
+    const onCheckChanged = (instrumenetId: number, beat: Beat, checked: boolean) =>
+        loop.set(instrumenetId, beat, checked ? 1 : 0)
 
     return (
         <div>
@@ -36,8 +39,9 @@ function Drumkit() {
             <button onClick={stop}>Click to stop</button>
             <p>Open the console to see results (F12)</p>
             <DrumkitGrid
-                dk={dk}
+                metadata={loop.metadata}
                 instruments={INSTRUMENTS}
+                onCheckChanged={onCheckChanged}
             />
         </div>
     );
@@ -53,11 +57,11 @@ function Drumkit() {
 type DrumkitGridProps = {
 
     /**
-     * The DrumkitLogic instance which holds the loop data.
+     * The LoopMetadata instance which describes the grid.
      *
-     * @since v0.0.2
+     * @since v0.0.3
      */
-    dk: DrumkitLogic;
+    metadata: LoopMetadata;
 
     /**
      * The instrument map used to construct the grid.
@@ -65,6 +69,14 @@ type DrumkitGridProps = {
      * @since v0.0.2
      */
     instruments: Map<number, Instrument>;
+
+    /**
+     * The callback function which is called when the cell of an instrument at
+     * a specific beat changes state.
+     *
+     * @since v0.0.3
+     */
+    onCheckChanged: (instrumentId: number, beat: Beat, checked: boolean) => void;
 }
 
 /**
@@ -77,7 +89,7 @@ type DrumkitGridProps = {
  *
  * @see {@link DrumkitGridProps}
  */
-function DrumkitGrid({ dk, instruments }: Readonly<DrumkitGridProps>) {
+function DrumkitGrid({ metadata, instruments, onCheckChanged }: Readonly<DrumkitGridProps>) {
 
     // array of instrument ids, sorted from lowest to highest
     // map each instrument id to a DrumkitRow component for that instrument
@@ -88,8 +100,9 @@ function DrumkitGrid({ dk, instruments }: Readonly<DrumkitGridProps>) {
             {instrumentIds.map((id) =>
                 <DrumkitRow
                     key={id}
-                    dk={dk}
+                    metadata={metadata}
                     instrument={instruments.get(id)!}
+                    onCheckChanged={(beat, checked) => onCheckChanged(id, beat, checked)}
                 />
             )}
         </div>
@@ -106,11 +119,11 @@ function DrumkitGrid({ dk, instruments }: Readonly<DrumkitGridProps>) {
 type DrumkitRowProps = {
 
     /**
-     * The DrumkitLogic instance which holds the loop data.
+     * The LoopMetadata instance which describes the grid.
      *
-     * @since v0.0.2
+     * @since v0.0.3
      */
-    dk: DrumkitLogic;
+    metadata: LoopMetadata;
 
     /**
      * The instrument which corresponds to this row.
@@ -118,6 +131,14 @@ type DrumkitRowProps = {
      * @since v0.0.2
      */
     instrument: Instrument;
+
+    /**
+     * The callback function which is called when the cell at a specific beat
+     * changes state.
+     *
+     * @since v0.0.3
+     */
+    onCheckChanged: (beat: Beat, checked: boolean) => void;
 }
 
 /**
@@ -132,11 +153,11 @@ type DrumkitRowProps = {
  *
  * @see {@link DrumkitGridProps}
  */
-function DrumkitRow({ dk, instrument }: Readonly<DrumkitRowProps>) {
+function DrumkitRow({ metadata, instrument, onCheckChanged }: Readonly<DrumkitRowProps>) {
 
     // array 0 - tickCount-1
     // map each tick to a DrumkitCell component for that tick
-    let ticks = Array(dk.loop.tickCount).fill(0).map((_, i) => i);
+    let ticks = Array(metadata.tickCount).fill(0).map((_, i) => i);
 
     return (
         <div>
@@ -146,7 +167,7 @@ function DrumkitRow({ dk, instrument }: Readonly<DrumkitRowProps>) {
                     <DrumkitCell
                         key={tick}
                         onCheckedChanged={(checked) =>
-                             dk.set(instrument.id, dk.loop.toBeat(tick), checked ? 1 : 0)
+                            onCheckChanged(metadata.toBeat(tick), checked)
                         }
                     />
                 )}

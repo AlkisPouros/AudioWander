@@ -1,7 +1,9 @@
 /**
- * @fileoverview Defines the {@link Beat} and {@link Loop} classes, which work
+ * @fileoverview Defines the {@link Beat} and {@link LoopMetadata} classes, which work
  * together to fully define a drump loop and a singular moment in that loop.
  */
+
+import { INSTRUMENTS, Instrument } from "./instrument";
 
 /**
  * Dataclass for a Beat, a moment inside a drump loop. Each Beat is identified
@@ -30,7 +32,7 @@ class Beat {
  *
  * @since v0.0.1
  */
-class Loop {
+class LoopMetadata {
 
     private beats_per_minute!: number;
 
@@ -104,7 +106,7 @@ class Loop {
     get bpm(): number { return this.beats_per_minute; }
 
     set bpm(value: number) {
-        if (!Loop.Constraints.checkBpm(value)) {
+        if (!LoopMetadata.Constraints.checkBpm(value)) {
             throw new Error("Invalid BPM");
         }
 
@@ -114,7 +116,7 @@ class Loop {
     get bars(): number { return this.bar_count; }
 
     set bars(value: number) {
-        if (!Loop.Constraints.checkBars(value)) {
+        if (!LoopMetadata.Constraints.checkBars(value)) {
             throw new Error("Invalid number of bars");
         }
 
@@ -124,7 +126,7 @@ class Loop {
     get beats(): number { return this.beat_count; }
 
     set beats(value: number) {
-        if (!Loop.Constraints.checkBeats(value)) {
+        if (!LoopMetadata.Constraints.checkBeats(value)) {
             throw new Error("Invalid number of beats");
         }
 
@@ -134,7 +136,7 @@ class Loop {
     get subdivisions(): number { return this.subdivisison_count; }
 
     set subdivisions(value: number) {
-        if (!Loop.Constraints.checkSubdivisions(value)) {
+        if (!LoopMetadata.Constraints.checkSubdivisions(value)) {
             throw new Error("Invalid number of subdivisions");
         }
 
@@ -220,8 +222,8 @@ class Loop {
          * @since v0.0.1
          */
         checkBpm(bpm: number): boolean {
-            return bpm >= Loop.Constraints.MIN_BPM
-                && bpm <= Loop.Constraints.MAX_BPM;
+            return bpm >= LoopMetadata.Constraints.MIN_BPM
+                && bpm <= LoopMetadata.Constraints.MAX_BPM;
         }
 
         /**
@@ -231,8 +233,8 @@ class Loop {
          * @since v0.0.1
          */
         checkBars(bars: number): boolean {
-            return bars >= Loop.Constraints.MIN_BAR_COUNT
-                && bars <= Loop.Constraints.MAX_BAR_COUNT;
+            return bars >= LoopMetadata.Constraints.MIN_BAR_COUNT
+                && bars <= LoopMetadata.Constraints.MAX_BAR_COUNT;
         }
 
         /**
@@ -242,8 +244,8 @@ class Loop {
          * @since v0.0.1
          */
         checkBeats(beats: number): boolean {
-            return beats >= Loop.Constraints.MIN_BEAT_COUNT
-                && beats <= Loop.Constraints.MAX_BEAT_COUNT;
+            return beats >= LoopMetadata.Constraints.MIN_BEAT_COUNT
+                && beats <= LoopMetadata.Constraints.MAX_BEAT_COUNT;
         }
 
         /**
@@ -253,10 +255,39 @@ class Loop {
          * @since v0.0.1
          */
         checkSubdivisions(subdivisions: number): boolean {
-            return subdivisions >= Loop.Constraints.MIN_SUBDIVISION_COUNT
-                && subdivisions <= Loop.Constraints.MAX_SUBDIVISION_COUNT;
+            return subdivisions >= LoopMetadata.Constraints.MIN_SUBDIVISION_COUNT
+                && subdivisions <= LoopMetadata.Constraints.MAX_SUBDIVISION_COUNT;
         }
     }
 }
 
-export { Beat, Loop };
+/**
+ * Encapsulates the data and the functionality of a drum kit. The data consists
+ * of information about whether each instrument will play each tick. This data
+ * is then used to play the drumkit, as defiend by the loop.
+ *
+ * @author Alex Mandelias
+ *
+ * @since v0.0.3
+ */
+class Loop {
+
+    // map: instrument id -> array of length `tickCount`, one vlaue for each tick
+    readonly data: Map<number, Array<number>> = new Map();
+
+    constructor(
+        readonly metadata: LoopMetadata
+    ) {
+        INSTRUMENTS.forEach((_, id) => {
+            let ticks = Array(this.metadata.tickCount).fill(0);
+            this.data.set(id, ticks);
+        })
+    }
+
+    set(instrumentId: number, beat: Beat, value: number) {
+        let tick = this.metadata.toTick(beat);
+        this.data.get(instrumentId)![tick] = value;
+    }
+}
+
+export { Beat, LoopMetadata, Loop };
