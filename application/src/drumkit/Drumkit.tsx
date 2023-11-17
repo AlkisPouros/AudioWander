@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { Player } from './drumkit-logic'
+import { Player } from './player'
 import { Beat, LoopMetadata } from './loop';
 import { CreateInstrumentListener, InstrumentManager } from './instrument';
 
