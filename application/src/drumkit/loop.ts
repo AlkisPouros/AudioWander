@@ -3,8 +3,6 @@
  * together to fully define a drump loop and a singular moment in that loop.
  */
 
-import { INSTRUMENTS, Instrument } from "./instrument";
-
 /**
  * Dataclass for a Beat, a moment inside a drump loop. Each Beat is identified
  * by its bar number, its beat in the bar, and the subdivision of the beat. All
@@ -15,6 +13,16 @@ import { INSTRUMENTS, Instrument } from "./instrument";
  * @since v0.0.1
  */
 class Beat {
+
+    /**
+     * Creates an instance of the Beat class.
+     *
+     * @param {number} bar the bar number in the meter
+     * @param {number} beat the beat number in the bar
+     * @param {number} subdivision the subdivision number in the beat
+     *
+     * @since v0.0.1
+     */
     constructor(
         readonly bar: number,
         readonly beat: number,
@@ -23,10 +31,10 @@ class Beat {
 }
 
 /**
- * Encapsulates the time information of drump loop. A loop is defined by its
- * speed (bpm) and the number of bars, beats and subdivisions thereof. Time
- * passes in ticks (one subdivision) and can be converted to meaningful and
- * rich Beat information, and vice versa.
+ * Encapsulates the metadata of drump loop. A loop is defined by its speed
+ * (bpm) and the number of bars, beats and subdivisions thereof. Time passes in
+ * ticks (one subdivision) and can be converted to and from meaningful and rich
+ * Beat information.
  *
  * @author Alex Mandelias
  *
@@ -40,6 +48,20 @@ class LoopMetadata {
     private beat_count!: number
     private subdivisison_count!: number
 
+    /**
+     * Creates an instance of the LoopMetadata class. The setters of each field
+     * are called in the constructor, ensuring that they are all within the
+     * constraints of this class.
+     *
+     * @param {number} bpm the speed of the loop in beats per minute
+     * @param {number} bars the bar count of the loop
+     * @param {number} beats the beat count of each bar
+     * @param {number} [subdivisions=1] the subdivision count of each beat
+     *
+     * @see {@link LoopMetadata.Constraints}
+     *
+     * @since v0.0.1
+     */
     constructor(bpm: number, bars: number, beats: number, subdivisions: number = 1) {
         // call the setter for each private field to perform error checking
         this.bpm = bpm;
@@ -49,8 +71,9 @@ class LoopMetadata {
     }
 
     /**
-     * Converts the given Beat to its corresponding tick in this drump loop.
-     * The tick is 0-indexed, meaning that Beat(1, 1, 1) corresponds to tick 1.
+     * Converts the given Beat to its corresponding tick in the context of a
+     * loop with this metadata. The tick is 0-indexed, meaning that
+     * Beat(1, 1, 1) corresponds to tick 0.
      *
      * A tick counts how many subdivisions have passed since the loop's
      * beginning. For example, a loop with 4 bars, 3 beats and 2 subdivisions
@@ -70,8 +93,9 @@ class LoopMetadata {
     }
 
     /**
-     * Converts the given tick to its corresponding Beat in this drump loop.
-     * The Beat is 1-indexed, meaning that tick 0 corresponds to Beat(1, 1, 1).
+     * Converts the given tick to its corresponding Beat in the context of a
+     * loop with this metadata. The Beat is 1-indexed, meaning that tick 0
+     * corresponds to Beat(1, 1, 1).
      *
      * The Beat contains rich information about the position of the music
      * inside the loop.
@@ -144,7 +168,7 @@ class LoopMetadata {
     }
 
     /**
-     * Defines constraints for the Loop's fields, and provides methods to
+     * Defines constraints for the metadata fields, and provides methods to
      * easily check whether value given is within said constraints.
      *
      * @author Alex Mandelias
@@ -261,33 +285,4 @@ class LoopMetadata {
     }
 }
 
-/**
- * Encapsulates the data and the functionality of a drum kit. The data consists
- * of information about whether each instrument will play each tick. This data
- * is then used to play the drumkit, as defiend by the loop.
- *
- * @author Alex Mandelias
- *
- * @since v0.0.3
- */
-class Loop {
-
-    // map: instrument id -> array of length `tickCount`, one vlaue for each tick
-    readonly data: Map<number, Array<number>> = new Map();
-
-    constructor(
-        readonly metadata: LoopMetadata
-    ) {
-        INSTRUMENTS.forEach((_, id) => {
-            let ticks = Array(this.metadata.tickCount).fill(0);
-            this.data.set(id, ticks);
-        })
-    }
-
-    set(instrumentId: number, beat: Beat, value: number) {
-        let tick = this.metadata.toTick(beat);
-        this.data.get(instrumentId)![tick] = value;
-    }
-}
-
-export { Beat, LoopMetadata, Loop };
+export { Beat, LoopMetadata };

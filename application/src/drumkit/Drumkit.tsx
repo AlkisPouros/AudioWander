@@ -1,16 +1,20 @@
 /**
- * @fileoverview Defines the Drumkit component which just runs some hardcoded
- * data in a loop for a few seconds.
+ * @fileoverview Defines the Drumkit component which defines the drum kit part
+ * of this application in its entirety.
  */
 
 import React from 'react';
 import { Player } from './drumkit-logic'
-import { Beat, Loop, LoopMetadata } from './loop';
-import { INSTRUMENTS, Instrument } from './instrument';
+import { Beat, LoopMetadata } from './loop';
+import { CreateInstrumentListener, InstrumentManager } from './instrument';
 
 /**
- * Defines the Drumkit component which consists of a button which, when
- * clicked, runs some hardcoded drumkit data in a loop for a few seconds.
+ * Defines the Drumkit component which consists of a grid of instruments and a
+ * form for adding new instruments. The grid has one row per instrument, and
+ * each row contains one column for each tick of the loop, as defiend by its
+ * metadata. The drumkit can be started and stopped using buttons. The grid
+ * cells indicate when each instrument will play in the beat. Changes to the
+ * cells are refelcted in real time while the drumkit is playing.
  *
  * @author Alex Mandelias
  *
@@ -18,20 +22,70 @@ import { INSTRUMENTS, Instrument } from './instrument';
  */
 function Drumkit() {
 
-    let loop = new Loop(new LoopMetadata(120, 2, 3, 1));
+    // --- instrument manager ---
 
-    const player = new Player(loop);
+    const instrumentManager = React.useRef(new InstrumentManager());
+
+    const [instrumentIds, setInstrumentIds] = React.useState(instrumentManager.current.getSortedIds());
+
+    React.useEffect(() => {
+
+        const listener: CreateInstrumentListener = (instrumentId) => {
+            setInstrumentIds(instrumentManager.current.getSortedIds());
+            setData(data.set(instrumentId, Array(metadata.current.tickCount).fill(0)));
+        };
+
+        instrumentManager.current.addCreateInstrumentListener(listener);
+
+        return () => {
+            instrumentManager.current.removeCreateInstrumentListener(listener);
+        };
+    }, [])
+
+    // --- metadata, data, player ---
+
+    const metadata = React.useRef(new LoopMetadata(120, 2, 3, 1));
+
+    // map (mutable): instrument id -> array of length `tickCount`, one vlaue for each tick
+    const [data, setData] = React.useState(new Map<number, Array<number>>());
+
+    const player = React.useRef(new Player(
+        metadata.current,
+        data,
+        (id, value) => instrumentManager.current.play(id, value)
+    ));
+
+    // --- callback functions ---
 
     const start = () => {
-        player.start();
+        player.current.start();
     }
 
     const stop = () => {
-        player.stop();
+        player.current.stop();
     }
 
-    const onCheckChanged = (instrumenetId: number, beat: Beat, checked: boolean) =>
-        loop.set(instrumenetId, beat, checked ? 1 : 0)
+    const onCheckChanged = (instrumentId: number, beat: Beat, checked: boolean) => {
+        let instrumentData = data.get(instrumentId)!;
+        let tick = metadata.current.toTick(beat);
+        instrumentData[tick] = checked ? 1 : 0;
+        setData(data.set(instrumentId, instrumentData));
+    }
+
+    // --- new instrument input form ---
+
+    const [newInstrumentDisplayName, setNewInstrumentDisplayName] = React.useState("");
+
+    const onAddInstrument = () => {
+        if (/^\s*$/.test(newInstrumentDisplayName)) {
+            return;
+        }
+
+        instrumentManager.current.create(newInstrumentDisplayName);
+        setNewInstrumentDisplayName("");
+    }
+
+    // --- the actual drumkit component ---
 
     return (
         <div>
@@ -39,10 +93,18 @@ function Drumkit() {
             <button onClick={stop}>Click to stop</button>
             <p>Open the console to see results (F12)</p>
             <DrumkitGrid
-                metadata={loop.metadata}
-                instruments={INSTRUMENTS}
+                metadata={metadata.current}
+                instrumentData={new Map(instrumentIds.map(
+                    (id) => [id, instrumentManager.current.getDisplayName(id)]
+                ))}
                 onCheckChanged={onCheckChanged}
             />
+            <input
+                type="text"
+                value={newInstrumentDisplayName}
+                onChange={(e) => setNewInstrumentDisplayName(e.target.value)}
+            ></input>
+            <button onClick={onAddInstrument}>Add Instrument</button>
         </div>
     );
 }
@@ -64,11 +126,11 @@ type DrumkitGridProps = {
     metadata: LoopMetadata;
 
     /**
-     * The instrument map used to construct the grid.
+     * The instrument data used to create the grid.
      *
-     * @since v0.0.2
+     * @since v0.0.4
      */
-    instruments: Map<number, Instrument>;
+    instrumentData: Map<number, string>;
 
     /**
      * The callback function which is called when the cell of an instrument at
@@ -89,11 +151,9 @@ type DrumkitGridProps = {
  *
  * @see {@link DrumkitGridProps}
  */
-function DrumkitGrid({ metadata, instruments, onCheckChanged }: Readonly<DrumkitGridProps>) {
+function DrumkitGrid({ metadata, instrumentData, onCheckChanged }: Readonly<DrumkitGridProps>) {
 
-    // array of instrument ids, sorted from lowest to highest
-    // map each instrument id to a DrumkitRow component for that instrument
-    let instrumentIds = Array.from(instruments.keys()).sort((i, j) => i - j);
+    let instrumentIds = Array.from(instrumentData.keys()).sort((a, b) => a - b);
 
     return (
         <div>
@@ -101,7 +161,7 @@ function DrumkitGrid({ metadata, instruments, onCheckChanged }: Readonly<Drumkit
                 <DrumkitRow
                     key={id}
                     metadata={metadata}
-                    instrument={instruments.get(id)!}
+                    instrumentDisplayName={instrumentData.get(id)!}
                     onCheckChanged={(beat, checked) => onCheckChanged(id, beat, checked)}
                 />
             )}
@@ -126,11 +186,11 @@ type DrumkitRowProps = {
     metadata: LoopMetadata;
 
     /**
-     * The instrument which corresponds to this row.
+     * The id of the instrument which corresponds to this row.
      *
-     * @since v0.0.2
+     * @since v0.0.4
      */
-    instrument: Instrument;
+    instrumentDisplayName: string;
 
     /**
      * The callback function which is called when the cell at a specific beat
@@ -153,7 +213,7 @@ type DrumkitRowProps = {
  *
  * @see {@link DrumkitGridProps}
  */
-function DrumkitRow({ metadata, instrument, onCheckChanged }: Readonly<DrumkitRowProps>) {
+function DrumkitRow({ metadata, instrumentDisplayName, onCheckChanged }: Readonly<DrumkitRowProps>) {
 
     // array 0 - tickCount-1
     // map each tick to a DrumkitCell component for that tick
@@ -161,7 +221,7 @@ function DrumkitRow({ metadata, instrument, onCheckChanged }: Readonly<DrumkitRo
 
     return (
         <div>
-            <p>{instrument.displayName}</p>
+            <p>{instrumentDisplayName}</p>
             <div>
                 {ticks.map((tick) =>
                     <DrumkitCell
