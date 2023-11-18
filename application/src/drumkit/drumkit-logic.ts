@@ -4,97 +4,60 @@
  */
 
 import { INSTRUMENTS } from './instrument'
-import { Beat, Loop } from './loop'
+import { Loop } from './loop'
 
 /**
- * Encapsulates the data and the functionality of a drum kit. The data consists
- * of information about whether each instrument will play each tick. This data
- * is then used to play the drumkit, as defiend by the loop.
+ * Defines the player class which is responsible for playing the drumkit's
+ * data in the context of the loop defined by the drumkit.
  *
  * @author Alex Mandelias
  *
- * @since v0.0.1
+ * @since v0.0.2
  */
-class DrumkitLogic {
+class Player {
 
-    private readonly loop: Loop;
+    constructor(
+        private readonly loop: Loop
+    ) { }
 
-    // map: instrument id -> array of length `tickCount`, one vlaue for each tick
-    private readonly data: Map<number, Array<number>>;
-
-    constructor(loop: Loop) {
-        this.loop = loop;
-        this.data = new Map(Array.from(INSTRUMENTS.keys()).map(
-            (id) => [id, Array.from({ length: this.loop.tickCount }, () => 0)]
-        ));
-    }
+    private currentTick: number = 0;
+    private nextTimeout?: NodeJS.Timeout;
 
     start() {
-        this.player.start();
+        this.stop();
+        this.nextTimeout = setTimeout(this.tick.bind(this));
     }
 
     stop() {
-        this.player.stop();
-    }
-
-    set(instrumentId: number, beat: Beat, value: number) {
-        let tick = this.loop.toTick(beat);
-        this.data.get(instrumentId)![tick] = value;
-    }
-
-    /**
-     * Defines the player class which is responsible for playing the drumkit's
-     * data in the context of the loop defined by the drumkit.
-     *
-     * @author Alex Mandelias
-     *
-     * @since v0.0.1
-     */
-    private readonly player = new class {
-
-        constructor(
-            private readonly drumkit: DrumkitLogic
-        ) { }
-
-        private currentTick: number = 0;
-        private nextTimeout?: NodeJS.Timeout;
-
-        start() {
-            this.stop();
-            this.nextTimeout = setTimeout(this.tick.bind(this));
+        this.currentTick = 0;
+        if (this.nextTimeout) {
+            clearTimeout(this.nextTimeout);
         }
+    }
 
-        stop() {
-            this.currentTick = 0;
-            if (this.nextTimeout) {
-                clearTimeout(this.nextTimeout);
+    private tick() {
+        // TODO: maybe refactor loop outside of tick(),
+        // and player just needs the loop?
+        // maybe not, get each it tick because it might change dynamically?
+        let { metadata, data } = this.loop;
+
+        let time = this.currentTick % metadata.tickCount;
+        data.forEach((array, id) => {
+            let value = array[time];
+
+            if (value === 1) {
+                INSTRUMENTS.get(id)!.play();
             }
-        }
+        });
 
-        tick() {
-            // TODO: maybe refactor loop outside of tick(),
-            // and player just needs the loop?
-            // maybe not, get each it tick because it might change dynamically?
-            let { loop, data } = this.drumkit;
+        // advance tick counter for next timeout
+        this.currentTick++;
 
-            let time = this.currentTick % loop.tickCount;
-            data.forEach((array, id) => {
-                let value = array[time];
-
-                if (value === 1) {
-                    INSTRUMENTS.get(id)!.play();
-                }
-            });
-
-            // advance tick counter for next timeout
-            this.currentTick++;
-
-            // set timeout for next tick of the loop
-            let secondsPerBeat = (1 / loop.bpm) * 60;
-            let msPerSubdivision = (secondsPerBeat / loop.subdivisions) * 1000;
-            this.nextTimeout = setTimeout(this.tick.bind(this), msPerSubdivision);
-        }
-    }(this);
+        // set timeout for next tick of the loop
+        let secondsPerBeat = (1 / metadata.bpm) * 60;
+        let msPerSubdivision = (secondsPerBeat / metadata.subdivisions) * 1000;
+        this.nextTimeout = setTimeout(this.tick.bind(this), msPerSubdivision);
+    }
 }
 
-export { DrumkitLogic };
+export { Player };
