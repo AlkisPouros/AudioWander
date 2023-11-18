@@ -4,7 +4,7 @@
  * moments in time according to some data and metadata.
  */
 
-import { LoopMetadata } from './loop'
+import { LoopMetadata } from './loop';
 
 /**
  * Defines the player class which is responsible for playing the drumkit's

@@ -231,6 +231,6 @@ class InstrumentManager {
     }
 }
 
-export { InstrumentManager }
+export { InstrumentManager };
 
-export type { CreateInstrumentListener, DeleteInstrumentListener }
+export type { CreateInstrumentListener, DeleteInstrumentListener };

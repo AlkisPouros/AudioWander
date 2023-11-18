@@ -4,11 +4,11 @@
  */
 
 import React from 'react';
-import { Player } from './player'
-import { Beat, LoopMetadata } from './loop';
-import { CreateInstrumentListener, InstrumentManager } from './instrument';
 import { DrumkitGrid } from './DrumkitGrid';
 import { InstrumentForm } from './InstrumentForm';
+import { CreateInstrumentListener, InstrumentManager } from './instrument';
+import { Beat, LoopMetadata } from './loop';
+import { Player } from './player';
 
 /**
  * Defines the Drumkit component which consists of a grid of instruments and a
