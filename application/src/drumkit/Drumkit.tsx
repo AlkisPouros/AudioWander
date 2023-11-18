@@ -8,6 +8,7 @@ import { Player } from './player'
 import { Beat, LoopMetadata } from './loop';
 import { CreateInstrumentListener, InstrumentManager } from './instrument';
 import { DrumkitGrid } from './DrumkitGrid';
+import { InstrumentForm } from './InstrumentForm';
 
 /**
  * Defines the Drumkit component which consists of a grid of instruments and a
@@ -21,6 +22,7 @@ import { DrumkitGrid } from './DrumkitGrid';
  * @sinve v0.0.1
  *
  * @see {@link DrumkitGrid}
+ * @see {@link InstrumentForm}
  */
 function Drumkit() {
 
@@ -74,17 +76,14 @@ function Drumkit() {
         setData(data.set(instrumentId, instrumentData));
     }
 
-    // --- new instrument input form ---
-
-    const [newInstrumentDisplayName, setNewInstrumentDisplayName] = React.useState("");
-
-    const onAddInstrument = () => {
+    const onTryCreateInstrument = (newInstrumentDisplayName: string) => {
+        // instrument display name regex: can't be only whitespace
         if (/^\s*$/.test(newInstrumentDisplayName)) {
-            return;
+            return false;
         }
 
         instrumentManager.current.create(newInstrumentDisplayName);
-        setNewInstrumentDisplayName("");
+        return true;
     }
 
     // --- the actual drumkit component ---
@@ -101,12 +100,9 @@ function Drumkit() {
                 ))}
                 onCheckChanged={onCheckChanged}
             />
-            <input
-                type="text"
-                value={newInstrumentDisplayName}
-                onChange={(e) => setNewInstrumentDisplayName(e.target.value)}
-            ></input>
-            <button onClick={onAddInstrument}>Add Instrument</button>
+            <InstrumentForm
+                onTryCreateInstrument={onTryCreateInstrument}
+            />
         </div>
     );
 }
