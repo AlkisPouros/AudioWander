@@ -16,12 +16,11 @@ type InstrumentFormProps = {
 
     /**
      * The callback function which is called when the user wishes to create a
-     * new instrument with the given display name. This function returns true if
-     * the instrument was successfully created, false otherwise.
+     * new instrument with the given display name and blob as its audio data.
      *
      * @since v0.0.5
      */
-    onTryCreateInstrument: (newInstrumentDisplayName: string) => boolean,
+    onTryCreateInstrument: (newInstrumentDisplayName: string, newInstrumentBlob: Blob) => void,
 }
 
 /**
@@ -39,7 +38,9 @@ function InstrumentForm({ onTryCreateInstrument }: InstrumentFormProps) {
     const [newInstrumentDisplayName, setNewInstrumentDisplayName] = React.useState("");
 
     const handleClick = () => {
-        let success = onTryCreateInstrument(newInstrumentDisplayName);
+        // TODO: find blob
+        let newInstrumentBlob = null;
+        onTryCreateInstrument(newInstrumentDisplayName, newInstrumentBlob);
 
         if (success) {
             setNewInstrumentDisplayName("");

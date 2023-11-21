@@ -6,8 +6,11 @@
  * objects and allows controlled interaction with them.
  */
 
+import { blobToBuffer } from "../audio/util";
+
 /**
- * Defines a musical instrument which can be used to play a sound.
+ * Defines a musical instrument which stores the metadata and audio data
+ * necessary to play a sound.
  *
  * @author Alex Mandelias
  *
@@ -15,14 +18,21 @@
  */
 class Instrument {
 
+    /**
+     * Creates an instance of Instrument class.
+     *
+     * @param {number} id the id of the instrument
+     * @param {string} displayName the user-friendly name of the instrument
+     * @param {AudioBuffer} buffer the audio buffer with the audio data, which
+     * will be used to play this instrument
+     *
+     * @since v0.0.1
+     */
     constructor(
-        public readonly id: number,
-        public readonly displayName: string,
+        readonly id: number,
+        readonly displayName: string,
+        readonly buffer: AudioBuffer,
     ) { }
-
-    play() {
-        console.log(`Playing ${this.displayName}`);
-    }
 }
 
 /**
@@ -59,6 +69,10 @@ type DeleteInstrumentListener = (instrumentId: number) => void;
  * @since v0.0.4
  */
 class InstrumentManager {
+
+    constructor(
+        private readonly onPlayAudioBuffer: (buffer: AudioBuffer) => void,
+    ) { }
 
     private readonly createInstrumentListeners: Set<CreateInstrumentListener> = new Set();
     private readonly deleteInstrumentListeners: Set<DeleteInstrumentListener> = new Set();
@@ -148,11 +162,12 @@ class InstrumentManager {
      *
      * @since v0.0.4
      */
-    create(displayName: string): number {
+    async create(displayName: string, blob: Blob): Promise<number> {
         let maxId = this.getSortedIds().at(-1);
         let newId = maxId === undefined ? 0 : maxId + 1;
+        let buffer = await blobToBuffer(blob);
 
-        const instrument = new Instrument(newId, displayName);
+        const instrument = new Instrument(newId, displayName, buffer);
         this.instruments.set(newId, instrument);
 
         this.createInstrumentListeners.forEach(l => l(newId));
@@ -226,7 +241,7 @@ class InstrumentManager {
         let instrument = this.get(id);
 
         if (value === 1) {
-            instrument.play();
+            this.onPlayAudioBuffer(instrument.buffer);
         }
     }
 }

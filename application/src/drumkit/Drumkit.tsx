@@ -9,6 +9,7 @@ import { InstrumentForm } from './InstrumentForm';
 import { CreateInstrumentListener, InstrumentManager } from './instrument';
 import { Beat, LoopMetadata } from './loop';
 import { Player } from './player';
+import { playAudioBuffer } from '../audio/util';
 
 /**
  * Defines the Drumkit component which consists of a grid of instruments and a
@@ -28,7 +29,7 @@ function Drumkit() {
 
     // --- instrument manager ---
 
-    const instrumentManager = React.useRef(new InstrumentManager());
+    const instrumentManager = React.useRef(new InstrumentManager(playAudioBuffer));
 
     const [instrumentIds, setInstrumentIds] = React.useState(instrumentManager.current.getSortedIds());
 
@@ -76,14 +77,8 @@ function Drumkit() {
         setData(data.set(instrumentId, instrumentData));
     }
 
-    const onTryCreateInstrument = (newInstrumentDisplayName: string) => {
-        // instrument display name regex: can't be only whitespace
-        if (/^\s*$/.test(newInstrumentDisplayName)) {
-            return false;
-        }
-
-        instrumentManager.current.create(newInstrumentDisplayName);
-        return true;
+    const onTryCreateInstrument = (displayName: string, blob: Blob) => {
+        instrumentManager.current.create(displayName, blob);
     }
 
     // --- the actual drumkit component ---
