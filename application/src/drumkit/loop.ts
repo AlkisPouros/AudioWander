@@ -88,7 +88,7 @@ class LoopMetadata {
      */
     toTick(beat: Beat): number {
         // beat is 1-indexed, return value (tick) is 0-indexed
-        return this.beats * (beat.bar - 1) + this.subdivisions * (beat.beat - 1)
+        return (this.beats * this.subdivisions) * (beat.bar - 1) + this.subdivisions * (beat.beat - 1)
             + beat.subdivision - 1;
     }
 
