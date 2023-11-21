@@ -25,7 +25,7 @@ function App() {
     }
     visualizeData();
   };
-
+  
   const visualizeData = () => {
     animationController = window.requestAnimationFrame(visualizeData);
     
