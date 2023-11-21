@@ -95,13 +95,6 @@ const ModularSynthesizer = () => {
 			filter.frequency.value = freq;
 
 			console.log(filter.frequency.value);
-
-			// Restart playback
-
-			if (isPlaying) {
-				player.stop();
-				player.start();
-			}
 		}
 	};
 
