@@ -282,7 +282,7 @@ class LoopMetadata {
             return subdivisions >= LoopMetadata.Constraints.MIN_SUBDIVISION_COUNT
                 && subdivisions <= LoopMetadata.Constraints.MAX_SUBDIVISION_COUNT;
         }
-    }
+    }();
 }
 
 export { Beat, LoopMetadata };

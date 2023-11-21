@@ -35,15 +35,19 @@ function Drumkit() {
 
     React.useEffect(() => {
 
+        const im = instrumentManager.current;
+
         const listener: CreateInstrumentListener = (instrumentId) => {
-            setInstrumentIds(instrumentManager.current.getSortedIds());
+            // TODO: this does trigger a re-render, and as a side-effect the data is also updated
+            setInstrumentIds(im.getSortedIds());
+            // TODO: this also does not trigger a re-render. consider changing it so it does
             setData(data.set(instrumentId, Array(metadata.current.tickCount).fill(0)));
         };
 
-        instrumentManager.current.addCreateInstrumentListener(listener);
+        im.addCreateInstrumentListener(listener);
 
         return () => {
-            instrumentManager.current.removeCreateInstrumentListener(listener);
+            im.removeCreateInstrumentListener(listener);
         };
     }, [])
 
@@ -74,6 +78,8 @@ function Drumkit() {
         let instrumentData = data.get(instrumentId)!;
         let tick = metadata.current.toTick(beat);
         instrumentData[tick] = checked ? 1 : 0;
+        // TODO: this does not trigger a re-render. consider changing it so it does
+        // this is only useful when setting drum cells programmatically
         setData(data.set(instrumentId, instrumentData));
     }
 
