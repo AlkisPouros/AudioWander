@@ -4,6 +4,7 @@ import { Decibels } from "tone/build/esm/core/type/Units";
 
 const player = new Tone.Player().toDestination();
 
+
 const ModularSynthesizer = () => {
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	/*const autoFilter = new Tone.AutoFilter({
@@ -16,6 +17,7 @@ const ModularSynthesizer = () => {
 	const dist = new Tone.Distortion(0.8).toDestination(); //distortion of the sound
 	const delay = new Tone.FeedbackDelay(0.5, 0.8).toDestination();
 	const filter = new Tone.Filter(350, "lowpass").toDestination();
+	const HighpassFilter = new Tone.Filter(1500,"highpass").toDestination();
 	const oscillator = new Tone.Oscillator(440, "sine").toDestination(); // To be checked
 	oscillator.connect(filter);
 
@@ -24,44 +26,69 @@ const ModularSynthesizer = () => {
 	const [distortion, setValue] = useState(0);
 	const [volume, setVolume] = useState(0);
 	const [frequency, setFrequency] = useState(350);
+	const [high_frequency, setHighFrequency] = useState(1500);
+	const [loop, setLoop] = useState(false);
 	const [isButtonClicked, setIsButtonClicked] = useState(false);
+	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
+	const [fileError, setFileError] = useState<string | null>(null);
 	const handleFileChange = async (
 		event: React.ChangeEvent<HTMLInputElement>
 	) => {
+		
 		const files = event.target.files;
-
+	
 		if (files && files.length > 0) {
+		 
 			const file = files[0];
-
+			setSelectedFile(file);
+			console.log(file);
 			player.dispose();
-
-			// Load the selected file into the new player
+	
+			
 			await player.load(URL.createObjectURL(file));
+			
+		}
+		else {
+			setFileError("No source audio file added");
 		}
 	};
-
 	const startPlayback = () => {
-		// Start Tone.js and player within the same user-initiated event
-		Tone.start();
+		
+		if(!fileInputRef.current?.value)
+		{
+			setFileError('Please select an audio file before starting');
+			return;
+		}
+		if(!player.state || player.state !=='started')
+		{
+			// Start Tone.js and player within the same user-initiated event
+			Tone.start();
+			setFileError(null);
+			console.log(player.buffer);
+			// Set the initial playback rate
+			player.playbackRate = playbackRate;
+			
+			// Set the initial distortion value
+			dist.distortion = distortion;
+			// Set the initial volume value
+			setVolume(Math.max(Math.min(volume, 0), -40));
 
-		// Set the initial playback rate
-		player.playbackRate = playbackRate;
+			// Chain effects to the player
+			player.chain(filter, HighpassFilter, dist, delay);
 
-		// Set the initial distortion value
-		dist.distortion = distortion;
-		// Set the initial volume value
-		setVolume(Math.max(Math.min(volume, 0), -40));
+			// Start playback when the user clicks "Play"
+			player.start();
 
-		// Chain effects to the player
-		player.chain(filter, dist, delay);
-
-		// Start playback when the user clicks "Play"
-		player.start();
-
-		setIsPlaying(true);
+			setIsPlaying(true);
+		}
 	};
 	const stopPlayback = () => {
+		if(!fileInputRef.current?.value)
+		{
+			setFileError('Please select an audio file before stopping');
+			return;
+		}
 		if (isPlaying) {
 			player.stop();
 			setIsPlaying(false);
@@ -97,17 +124,32 @@ const ModularSynthesizer = () => {
 			console.log(filter.frequency.value);
 		}
 	};
+	const changeFilterFrequency = (freq: number) => {
+		setHighFrequency(freq);
 
+		HighpassFilter.frequency.value = freq;
+		
+	}
+	const toggleLoop = () => {
+		const newLoopValue = !loop;
+		setLoop(newLoopValue);
+		
+		if(player)
+		{
+			player.loop = !loop
+		}
+	}
 	return (
 		<div>
+			{fileError && <p style= {{color:'red'}}>{fileError}</p>}
 			<input
 				type='file'
 				accept='audio/*'
 				ref={fileInputRef}
 				onChange={handleFileChange}
 			/>
-			<button onClick={startPlayback}>Play</button>
-			<button onClick={stopPlayback}>Stop</button>
+			{selectedFile && (<><button onClick={startPlayback}>Play</button>
+								<button onClick={stopPlayback}>Stop</button></>)}
 			<label>
 				Playback Speed:
 				<input
@@ -150,8 +192,24 @@ const ModularSynthesizer = () => {
 					min='10'
 					max='20000'
 					value={frequency}
-					onChange={(e) => changeFrequency(parseFloat(e.target.value))}
+					onChange={(e) => changeFilterFrequency(parseFloat(e.target.value))}
 				></input>
+			</label>
+			<label>
+				Filter Frequency (highpass)
+				<input
+					type="range"
+					step='2'
+					min='10'
+					max='20000'
+					value={high_frequency}
+					onChange={(e)=> changeFrequency(parseFloat(e.target.value))}
+				></input>
+			</label>
+			<label>
+				Loop:
+				<input type="checkbox" checked={loop} onChange={toggleLoop}/>
+				
 			</label>
 		</div>
 	);
