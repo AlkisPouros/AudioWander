@@ -1,14 +1,18 @@
-import React, { useRef, useState, useMemo } from "react";
+import React, { useRef, useState } from "react";
 import * as Tone from "tone";
 import { Decibels } from "tone/build/esm/core/type/Units";
 
-const sfx_players = new Tone.Players().toDestination();
+const sfx_players: Tone.Player[] = [];
 const player = new Tone.Player().toDestination();
 const dist = new Tone.Distortion().toDestination(); //distortion of the sound
 const filter = new Tone.Filter(350, "lowpass").toDestination();
 const HighpassFilter = new Tone.Filter(1500, "highpass").toDestination();
 const destinationNode = new Tone.Gain().toDestination();
 const reverb = new Tone.Reverb().toDestination();
+
+
+//sfx players are being connected to the same direction 
+sfx_players.forEach((player) => player.connect(destinationNode));
 
 const ModularSynthesizer = () => {
 	const fileInputRef = useRef<HTMLInputElement>(null);
@@ -37,15 +41,7 @@ const ModularSynthesizer = () => {
 	const [arePlayersPlaying, setArePlayersPlaying] = useState(false);
 	const [playersSelectedFile, setPlayersSelectedFile] = useState<File | null>(null);
 	const [playersFileError, setPlayersFileError] = useState<string | null>(null);
-
-	const playerKeys = [] as Array<String>;
-
-	const addPlayer = (file : File, key : string) => {
-		const player = new Tone.Player(URL.createObjectURL(file)).toDestination();
-		sfx_players.add(key, player.name);
-		playerKeys.push(key);
-	};
-
+	const [check, setCheck] = useState(false);
 	const handleSFXFileChange = async (
 		event: React.ChangeEvent<HTMLInputElement>
 	) => {
@@ -58,18 +54,23 @@ const ModularSynthesizer = () => {
 			);
 			if (validAudioFiles.length > 0) {
 				setPlayersFileError(null);
-				setPlayersSelectedFile(validAudioFiles[0]);
+				
 
 				// Dispose of previous players
-				if (sfx_players) {
-					sfx_players.dispose();
-				}
+				setPlayersFileError(null);
+
+				// Dispose of previous players
+				sfx_players.forEach((player) => player.dispose());
+				sfx_players.length = 0;
 
 				//upload files
-				validAudioFiles.forEach((file, index) => {
-					const player = new Tone.Player().toDestination();
-					sfx_players.add(index.toString(), player.name); // Use the index as the key
-				});
+				await Promise.all(
+					validAudioFiles.map(async (file, index) => {
+					  const player = new Tone.Player().toDestination();
+					  await player.load(URL.createObjectURL(file));
+					  sfx_players.push(player);
+					}));
+				setPlayersSelectedFile(validAudioFiles[0]);
 			}
 		} else {
 			setPlayersFileError("No source audio file added");
@@ -88,8 +89,12 @@ const ModularSynthesizer = () => {
 			setPlayersFileError(null);
 			// Start the players
 			//The code is to be completed
-      		
-			
+			sfx_players.forEach((player) => {
+				if (player.state !== "started" || !sfx_players) {
+					player.start();
+				}
+			});
+
 			setArePlayersPlaying(true);
 		}
 	};
@@ -97,8 +102,10 @@ const ModularSynthesizer = () => {
 	const stopPlayersPlayback = () => {
 		if (arePlayersPlaying || sfx_players) {
 			// Stop and disconnect the players
-			sfx_players.stopAll();
-			sfx_players.disconnect();
+			sfx_players.forEach((player) => {
+				player.stop();
+				player.disconnect();
+			});
 
 			setArePlayersPlaying(false);
 		}
@@ -135,6 +142,12 @@ const ModularSynthesizer = () => {
 
 			// Set the initial distortion value
 			dist.distortion = distortion;
+			//set the initial ping pong delay effect values
+			/** 
+			ping_pong.delayTime.value = delay;
+			ping_pong.feedback.value = feedback;
+			ping_pong.wet.value = wetPingPongValue;*/
+
 			// Set the initial volume value
 			setVolume(Math.max(Math.min(volume, 0), -40));
 
@@ -224,7 +237,22 @@ const ModularSynthesizer = () => {
 			reverb.preDelay = pre_delay;
 		}
 	};
-
+	const isChecked = () => {
+		const newValue = !check;
+		setCheck(newValue);
+		const ping_pong = new Tone.PingPongDelay().toDestination();
+		if(newValue === true || player.state === "started")
+		{
+			player.connect(ping_pong);
+			
+		} else {
+			player.disconnect(ping_pong);
+			ping_pong.dispose();
+		}
+		
+		
+	}
+	 
 	return (
 		<div>
 			{fileError && <p style={{ color: "red" }}>{fileError}</p>}
@@ -330,6 +358,9 @@ const ModularSynthesizer = () => {
 				></input>
 			</label>
 			<label>
+
+			</label>
+			<label>
 				Wetness:
 				<input
 					type='range'
@@ -350,6 +381,11 @@ const ModularSynthesizer = () => {
 					value={pre_delay}
 					onChange={(e) => preDelayValue(parseFloat(e.target.value))}
 				></input>
+			</label>
+			
+			<label>
+				Ping Pong Delay:
+				<input type='checkbox' checked={check} onChange={(e)=>isChecked()}></input>
 			</label>
 		</div>
 	);
