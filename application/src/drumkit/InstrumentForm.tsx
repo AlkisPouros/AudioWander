@@ -4,6 +4,7 @@
  */
 
 import React, { MutableRefObject } from "react";
+import './InstrumentForm.css';
 
 /**
  * Defines the props for the InstrumentForm component.
@@ -39,52 +40,77 @@ function InstrumentForm({ onTryCreateInstrument }: InstrumentFormProps) {
     const elForm = React.useRef<HTMLFormElement>(null) as MutableRefObject<HTMLFormElement>;
     const elInputDisplayName = React.useRef<HTMLInputElement>(null) as MutableRefObject<HTMLInputElement>;
     const elInputAudio = React.useRef<HTMLInputElement>(null) as MutableRefObject<HTMLInputElement>;
+    const elSpanFileName = React.useRef<HTMLSpanElement>(null) as MutableRefObject<HTMLSpanElement>;
+    const elAudioPreviewButton = React.useRef<HTMLButtonElement>(null) as MutableRefObject<HTMLButtonElement>;
     const elAudioPreview = React.useRef<HTMLAudioElement>(null) as MutableRefObject<HTMLAudioElement>;
 
     const invalidDisplayNameErrorMsg = "Invalid display name!";
     const missingAudioFileErrorMsg = "No audio file selected!";
     const invalidAudioFileErrorMsg = "Invalid audio file!";
 
-    // resets validity but does not report it
+    const [reportDisplayNameValidity, setReportDisplayNameValidity] = React.useState(false);
+    const [reportAudioFileValidity, setReportAudioFileValidity] = React.useState(false);
+    const [displayNameValidity, setDisplayNameValidity] = React.useState("");
+    const [audioFileValidity, setAudioFileValidity] = React.useState("");
+
+    // reset and hide validity
     const resetValidity = React.useCallback(() => {
-        elInputDisplayName.current.setCustomValidity(invalidDisplayNameErrorMsg);
-        elInputAudio.current.setCustomValidity(missingAudioFileErrorMsg);
+        setReportDisplayNameValidity(false);
+        setReportAudioFileValidity(false);
+        setDisplayNameValidity(invalidDisplayNameErrorMsg);
+        setAudioFileValidity(missingAudioFileErrorMsg);
+        elAudioPreviewButton.current.disabled = true;
     }, []);
 
-    // set initial validity once but don't report it
+    // set initial validity and hide it
     React.useEffect(() => {
         resetValidity();
     }, [resetValidity]);
 
-    // cache listeners
+    // cache load/error/click listeners
     const onLoadListener = React.useCallback(() => {
-        elInputAudio.current.setCustomValidity("");
+        setAudioFileValidity("");
+
+        elAudioPreviewButton.current.disabled = false;
     }, []);
 
     const onErrorListener = React.useCallback(() => {
-        if (elInputAudio.current.value === "") {
-            elInputAudio.current.setCustomValidity(missingAudioFileErrorMsg);
-            // don't report on missing file; this happens in two cases:
-            // either user cancelled input or src programmatically set to ""
-        } else {
-            elInputAudio.current.setCustomValidity(invalidAudioFileErrorMsg);
-            elInputAudio.current.reportValidity();
-        }
+        // determine cause of error: either missing of bad file type
+        let missing = elInputAudio.current.value === "";
+
+        setAudioFileValidity(missing
+            ? missingAudioFileErrorMsg
+            : invalidAudioFileErrorMsg
+        );
+
+        // don't report on missing file; this happens in two cases:
+        // either user cancelled input or src programmatically set to ""
+        setReportAudioFileValidity(!missing);
+
+        elAudioPreviewButton.current.disabled = true;
     }, []);
 
-    // attach listeners on render, detach on destroy
+    const onPreviewListener = React.useCallback(() => {
+        // button disabled onerror; play() won't fail
+        elAudioPreview.current.play();
+    }, []);
+
+    // add listeners on render, remove on destroy
     React.useEffect(() => {
 
         const currentElAudioPreview = elAudioPreview.current;
+        const currentElAudioPreviewButton = elAudioPreviewButton.current;
 
         currentElAudioPreview.addEventListener("canplaythrough", onLoadListener);
         currentElAudioPreview.addEventListener("error", onErrorListener);
+        currentElAudioPreviewButton.addEventListener("click", onPreviewListener);
 
         return () => {
             currentElAudioPreview.removeEventListener("canplaythrough", onLoadListener);
             currentElAudioPreview.removeEventListener("error", onErrorListener);
+            currentElAudioPreviewButton.removeEventListener("click", onPreviewListener);
         }
-    }, [onErrorListener, onLoadListener])
+    }, [onErrorListener, onLoadListener, onPreviewListener])
 
     // read selected audio file and preview it using an audio element
     const previewSelectedAudioFile = () => {
@@ -92,16 +118,23 @@ function InstrumentForm({ onTryCreateInstrument }: InstrumentFormProps) {
             throw new Error("how could this haaaappen to meeeee");
         }
 
+        let audio_file = elInputAudio.current.files[0];
+
         let reader = new FileReader();
         reader.onloadend = () => {
+            elSpanFileName.current.textContent = audio_file.name;
+            // this line will cause either the onLoad or the onError listeners
+            // of the elAudioPreview element to fire, thereby updating both the
+            // validity and the elAudioPreviewButton enabled state
             elAudioPreview.current.src = reader.result as string;
         }
-
-        let audio_file = elInputAudio.current.files[0];
 
         if (audio_file) {
             reader.readAsDataURL(audio_file);
         } else {
+            // on cancel: clear the spanFileName element and also cause the
+            // onError listener on the audio element to fire
+            elSpanFileName.current.textContent = "";
             elAudioPreview.current.src = "";
         }
     }
@@ -113,15 +146,24 @@ function InstrumentForm({ onTryCreateInstrument }: InstrumentFormProps) {
         _setNewInstrumentDisplayName(displayName);
 
         let invalidDisplayName = /^\s*$/.test(displayName);
-        elInputDisplayName.current.setCustomValidity(
+        setDisplayNameValidity(
             invalidDisplayName ? invalidDisplayNameErrorMsg : ""
         );
-        elInputDisplayName.current.reportValidity();
+
+        // turn on validity after being initially turned off
+        setReportDisplayNameValidity(true);
     }
 
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         // don't reload page
         e.preventDefault();
+
+        if (!(displayNameValidity === "" && audioFileValidity === "")) {
+            // force show both validities on error and return
+            setReportAudioFileValidity(true);
+            setReportDisplayNameValidity(true);
+            return;
+        }
 
         // extract instrument data from input fields
         let displayName = newInstrumentDisplayName;
@@ -131,27 +173,61 @@ function InstrumentForm({ onTryCreateInstrument }: InstrumentFormProps) {
         onTryCreateInstrument(displayName, blob);
 
         // clear input fields
-        // reset text input without changing or reporting validity
+
+        // reset text and audio inputs
         _setNewInstrumentDisplayName("");
-        // reset audio input without reporting validity
         elForm.current.reset();
-        // reset audio preview; validity is not reported on missing file (src == "")
+
+        // reset audio preview
+        elSpanFileName.current.textContent = "";
         elAudioPreview.current.src = "";
-        // reset validity for all input elements
+
+        // reset and hide validity
         resetValidity();
     }
 
     return (
-        <form ref={elForm} onSubmit={onSubmit}>
-            <input
-                ref={elInputDisplayName}
-                type="text"
-                value={newInstrumentDisplayName}
-                onChange={(e) => onSetNewInstrumentDisplayName(e.target.value) }
-            />
-            <input ref={elInputAudio} type="file" onChange={previewSelectedAudioFile}/>
-            <audio ref={elAudioPreview} controls data-valid="false"></audio>
-            <button type="submit">Add Instrument</button>
+        <form ref={elForm} id="instrument-form" noValidate onSubmit={onSubmit}>
+            <div className="form-field">
+                <label
+                    htmlFor="display-name-input"
+                >Instrument Name:</label>
+                <input
+                    ref={elInputDisplayName}
+                    id="display-name-input"
+                    type="text"
+                    value={newInstrumentDisplayName}
+                    onChange={(e) => onSetNewInstrumentDisplayName(e.target.value) }
+                />
+                <span className="error">
+                    {reportDisplayNameValidity ? displayNameValidity : ""}
+                </span>
+            </div>
+            <div className="form-field">
+                <label
+                    className="button-label"
+                    htmlFor="audio-input"
+                >Choose an Audio File</label>
+                <input
+                    ref={elInputAudio}
+                    className="input-hidden"
+                    id="audio-input"
+                    type="file"
+                    accept="audio/*"
+                    onChange={previewSelectedAudioFile}
+                />
+                <span ref={elSpanFileName}></span>
+                {/* https://stackoverflow.com/questions/2825856/html-button-to-not-submit-form#answer-2825867 */}
+                <button ref={elAudioPreviewButton} type="button">Preview</button>
+                <span className="error">
+                    {reportAudioFileValidity ? audioFileValidity : ""}
+                </span>
+                <audio ref={elAudioPreview}></audio>
+            </div>
+            <div>
+                <label htmlFor="submit" className="button-label">Submit</label>
+                <input className="input-hidden" type="submit" id="submit"></input>
+            </div>
         </form>
     )
 }
