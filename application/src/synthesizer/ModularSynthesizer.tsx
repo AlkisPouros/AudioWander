@@ -1,7 +1,8 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useMemo } from "react";
 import * as Tone from "tone";
 import { Decibels } from "tone/build/esm/core/type/Units";
 
+const sfx_players = new Tone.Players().toDestination();
 const player = new Tone.Player().toDestination();
 const dist = new Tone.Distortion().toDestination(); //distortion of the sound
 const filter = new Tone.Filter(350, "lowpass").toDestination();
@@ -11,16 +12,14 @@ const reverb = new Tone.Reverb().toDestination();
 
 const ModularSynthesizer = () => {
 	const fileInputRef = useRef<HTMLInputElement>(null);
+	const playersFileInputRef = useRef<HTMLInputElement>(null);
 	/*const autoFilter = new Tone.AutoFilter({
 		frequency: 1, // Valid range: 0 to 1
 		depth: 1,
 		baseFrequency: 5000, // Valid range: 10 to 10000
 		octaves: 4,
 	  }).toDestination();
-	  */
-
-	//const oscillator = new Tone.Oscillator(440, "sine").toDestination(); // To be checked
-	//oscillator.connect(filter);
+	  */ // To be checked
 
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [playbackRate, setPlaybackRate] = useState(1);
@@ -30,10 +29,80 @@ const ModularSynthesizer = () => {
 	const [high_frequency, setHighFrequency] = useState(1500);
 	const [loop, setLoop] = useState(false);
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
 	const [decay_value, setDecayValue] = useState(0);
 	const [wet_value, setWetValue] = useState(0);
 	const [pre_delay, setPreDelay] = useState(0);
 	const [fileError, setFileError] = useState<string | null>(null);
+	const [arePlayersPlaying, setArePlayersPlaying] = useState(false);
+	const [playersSelectedFile, setPlayersSelectedFile] = useState<File | null>(null);
+	const [playersFileError, setPlayersFileError] = useState<string | null>(null);
+
+	const playerKeys = [] as Array<String>;
+
+	const addPlayer = (file : File, key : string) => {
+		const player = new Tone.Player(URL.createObjectURL(file)).toDestination();
+		sfx_players.add(key, player.name);
+		playerKeys.push(key);
+	};
+
+	const handleSFXFileChange = async (
+		event: React.ChangeEvent<HTMLInputElement>
+	) => {
+		const files = event.target.files;
+
+		if (files && files.length > 0) {
+			const newFiles = Array.from(files);
+			const validAudioFiles = newFiles.filter((file) =>
+				file.type.startsWith("audio/")
+			);
+			if (validAudioFiles.length > 0) {
+				setPlayersFileError(null);
+				setPlayersSelectedFile(validAudioFiles[0]);
+
+				// Dispose of previous players
+				if (sfx_players) {
+					sfx_players.dispose();
+				}
+
+				//upload files
+				validAudioFiles.forEach((file, index) => {
+					const player = new Tone.Player().toDestination();
+					sfx_players.add(index.toString(), player.name); // Use the index as the key
+				});
+			}
+		} else {
+			setPlayersFileError("No source audio file added");
+		}
+	};
+
+	const startPlayersPlayback = () => {
+		if (!playersFileInputRef.current?.value) {
+			setPlayersFileError("Please select an audio file before starting");
+			return;
+		}
+
+		if (!arePlayersPlaying || !sfx_players) {
+			// Start Tone.js and players within the same user-initiated event
+			Tone.start();
+			setPlayersFileError(null);
+			// Start the players
+			//The code is to be completed
+      		
+			
+			setArePlayersPlaying(true);
+		}
+	};
+
+	const stopPlayersPlayback = () => {
+		if (arePlayersPlaying || sfx_players) {
+			// Stop and disconnect the players
+			sfx_players.stopAll();
+			sfx_players.disconnect();
+
+			setArePlayersPlaying(false);
+		}
+	};
 
 	const handleFileChange = async (
 		event: React.ChangeEvent<HTMLInputElement>
@@ -76,7 +145,7 @@ const ModularSynthesizer = () => {
 			HighpassFilter.connect(dist);
 			dist.connect(reverb);
 			reverb.connect(destinationNode);
-			
+			//sfx_players.connect(destinationNode);
 
 			// Start playback when the user clicks "Play"
 			player.start();
@@ -133,7 +202,6 @@ const ModularSynthesizer = () => {
 	const toggleLoop = () => {
 		const newLoopValue = !loop;
 		setLoop(newLoopValue);
-
 		if (player) {
 			player.loop = !loop;
 		}
@@ -156,6 +224,7 @@ const ModularSynthesizer = () => {
 			reverb.preDelay = pre_delay;
 		}
 	};
+
 	return (
 		<div>
 			{fileError && <p style={{ color: "red" }}>{fileError}</p>}
@@ -171,6 +240,24 @@ const ModularSynthesizer = () => {
 					<button onClick={stopPlayback}>Stop</button>
 				</>
 			)}
+			<label>
+				Add SFX:
+				{playersFileError && <p style={{ color: "red" }}>{playersFileError}</p>}
+				<input
+					type='file'
+					accept='audio/*'
+					multiple
+					ref={playersFileInputRef}
+					onChange={handleSFXFileChange}
+				></input>
+				{playersSelectedFile && (
+					<>
+						<button onClick={startPlayersPlayback}>Start sfx</button>
+						<button onClick={stopPlayersPlayback}>Stop sfx</button>
+					</>
+				)}
+			</label>
+
 			<label>
 				Playback Speed:
 				<input
