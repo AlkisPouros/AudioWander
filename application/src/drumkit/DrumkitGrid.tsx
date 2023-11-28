@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { Beat, LoopMetadata } from './loop';
+import './DrumkitGrid.css';
 
 /**
  * Defines the props for the DrumkitGrid component.
@@ -58,7 +59,7 @@ function DrumkitGrid({ metadata, instrumentData, onCheckChanged }: Readonly<Drum
     let instrumentIds = Array.from(instrumentData.keys()).sort((a, b) => a - b);
 
     return (
-        <div>
+        <table id='drumkit-grid'>
             {instrumentIds.map((id) =>
                 <DrumkitRow
                     key={id}
@@ -67,7 +68,7 @@ function DrumkitGrid({ metadata, instrumentData, onCheckChanged }: Readonly<Drum
                     onCheckChanged={(beat, checked) => onCheckChanged(id, beat, checked)}
                 />
             )}
-        </div>
+        </table>
     )
 }
 
@@ -124,9 +125,9 @@ function DrumkitRow({ metadata, instrumentDisplayName, onCheckChanged }: Readonl
     const toBeat = (tick: number) => metadata.toBeat(tick);
 
     return (
-        <div>
-            <p>{instrumentDisplayName}</p>
-            <div>
+        <tr className='drumkit-row'>
+            <td className='drumkit-row-instrument'>{instrumentDisplayName}</td>
+            <td className='drumkit-row-data'>
                 {ticks.map((tick) =>
                     <DrumkitCell
                         key={tick}
@@ -134,8 +135,8 @@ function DrumkitRow({ metadata, instrumentDisplayName, onCheckChanged }: Readonl
                         onCheckedChanged={(checked) => onCheckChanged(toBeat(tick), checked) }
                     />
                 )}
-            </div>
-        </div>
+            </td>
+        </tr>
     )
 }
 
@@ -184,12 +185,18 @@ function DrumkitCell({ beat, onCheckedChanged }: Readonly<DrumkitCellProps>) {
         onCheckedChanged(newChecked);
     };
 
+    const isBeat = beat.subdivision === 1;
+    const isOne = isBeat && beat.beat === 1;
+
+    let beatClass = `beat-${isOne ? "one" : isBeat ? "beat" : "sub"}`;
+
     return (
-        <input
-            type="checkbox"
-            checked={checked}
-            onChange={handleChange}
-        />
+        <div
+            className={`drumkit-cell-wrapper ${beatClass}`}
+            onClick={handleChange}
+        >
+            <div className={`drumkit-cell ${checked ? "" : "un"}checked`} />
+        </div>
     );
 }
 

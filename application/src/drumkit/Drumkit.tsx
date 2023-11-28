@@ -90,7 +90,7 @@ function Drumkit() {
     // --- the actual drumkit component ---
 
     return (
-        <div>
+        <div id="drumkit">
             <button onClick={start}>Click to start</button>
             <button onClick={stop}>Click to stop</button>
             <p>Open the console to see results (F12)</p>
