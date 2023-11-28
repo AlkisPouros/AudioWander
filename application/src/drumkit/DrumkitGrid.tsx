@@ -121,6 +121,8 @@ function DrumkitRow({ metadata, instrumentDisplayName, onCheckChanged }: Readonl
     // map each tick to a DrumkitCell component for that tick
     let ticks = Array(metadata.tickCount).fill(0).map((_, i) => i);
 
+    const toBeat = (tick: number) => metadata.toBeat(tick);
+
     return (
         <div>
             <p>{instrumentDisplayName}</p>
@@ -128,18 +130,14 @@ function DrumkitRow({ metadata, instrumentDisplayName, onCheckChanged }: Readonl
                 {ticks.map((tick) =>
                     <DrumkitCell
                         key={tick}
-                        onCheckedChanged={(checked) =>
-                            onCheckChanged(metadata.toBeat(tick), checked)
-                        }
+                        beat={toBeat(tick)}
+                        onCheckedChanged={(checked) => onCheckChanged(toBeat(tick), checked) }
                     />
                 )}
             </div>
         </div>
     )
 }
-
-// TODO: contemplate whether beat info is required for the specific slot
-// maybe use beat to style column inside of loop?
 
 /**
  * Defines the props for the DrumkitCell component.
@@ -149,6 +147,14 @@ function DrumkitRow({ metadata, instrumentDisplayName, onCheckChanged }: Readonl
  * @since v0.0.2
  */
 type DrumkitCellProps = {
+
+    /**
+     * The Beat in the loop this cell corresponds to; used to style it
+     * according to its place in the loop.
+     *
+     * @since v0.0.7
+     */
+    beat: Beat;
 
     /**
      * The callback function which is called when the checked state of this
@@ -169,7 +175,7 @@ type DrumkitCellProps = {
  *
  * @since v0.0.2
  */
-function DrumkitCell({ onCheckedChanged }: Readonly<DrumkitCellProps>) {
+function DrumkitCell({ beat, onCheckedChanged }: Readonly<DrumkitCellProps>) {
     const [checked, setChecked] = React.useState(false);
 
     const handleChange = () => {
