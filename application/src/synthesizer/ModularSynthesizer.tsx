@@ -9,7 +9,7 @@ const filter = new Tone.Filter(350, "lowpass").toDestination();
 const HighpassFilter = new Tone.Filter(1500, "highpass").toDestination();
 const destinationNode = new Tone.Gain().toDestination();
 const reverb = new Tone.Reverb().toDestination();
-
+const ping_pong = new Tone.PingPongDelay().toDestination();
 
 //sfx players are being connected to the same direction 
 sfx_players.forEach((player) => player.connect(destinationNode));
@@ -240,8 +240,8 @@ const ModularSynthesizer = () => {
 	const isChecked = () => {
 		const newValue = !check;
 		setCheck(newValue);
-		const ping_pong = new Tone.PingPongDelay().toDestination();
-		if(newValue === true || player.state === "started")
+		
+		if(newValue === true && player.state === "started")
 		{
 			player.connect(ping_pong);
 			
