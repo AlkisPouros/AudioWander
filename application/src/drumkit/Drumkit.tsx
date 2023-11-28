@@ -10,6 +10,7 @@ import { CreateInstrumentListener, InstrumentManager } from './instrument';
 import { Beat, LoopMetadata } from './loop';
 import { Player } from './player';
 import { playAudioBuffer } from '../audio/util';
+import './Drumkit.css'
 
 /**
  * Defines the Drumkit component which consists of a grid of instruments and a

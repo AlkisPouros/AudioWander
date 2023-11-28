@@ -1,20 +1,8 @@
-#drumkit {
-    --c-text: #D9D9D9;
-    --c-accent: #D00000;
-    --c-accent-alt: #0021CE;
-    --c-bg: #081246;
-    --c-bg-accent: #0F1C5C;
-    --c-border: #BBB;
+#drumkit-grid {
     --c-beat-one: #E2A954;
     --c-beat-beat: #C29551;
     --c-beat-sub: #947E5D;
 
-    font-family: 'Times New Roman', Times, serif;
-    color: var(--c-text);
-    background-color: var(--c-bg);
-}
-
-#drumkit-grid {
     border-collapse: collapse;
 }
 
