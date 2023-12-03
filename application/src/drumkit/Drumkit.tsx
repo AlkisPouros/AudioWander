@@ -11,6 +11,7 @@ import { Beat, LoopMetadata } from './loop';
 import { Player } from './player';
 import { playAudioBuffer } from '../audio/util';
 import './Drumkit.css'
+import { MetadataController } from './MetadataController';
 
 /**
  * Defines the Drumkit component which consists of a grid of instruments and a
@@ -96,6 +97,10 @@ function Drumkit() {
             <button onClick={start}>Click to start</button>
             <button onClick={stop}>Click to stop</button>
             <p>Open the console to see results (F12)</p>
+            <MetadataController
+                metadata={metadata}
+                onSetMetadata={setMetadata}
+            />
             <DrumkitGrid
                 metadata={metadata}
                 instrumentData={new Map(instrumentIds.map(
