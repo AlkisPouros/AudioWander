@@ -27,11 +27,12 @@ type DrumkitGridProps = {
     metadata: LoopMetadata;
 
     /**
-     * The instrument data used to create the grid.
+     * The instrument data used to create the grid. This includes the name of
+     * each instrument, along with the information about which beat it plays.
      *
      * @since v0.0.4
      */
-    instrumentData: Map<number, string>;
+    instrumentData: Map<number, [string, Map<Beat, number>]>;
 
     /**
      * The callback function which is called when the cell of an instrument at
@@ -64,7 +65,7 @@ function DrumkitGrid({ metadata, instrumentData, onCheckChanged }: Readonly<Drum
                 <DrumkitRow
                     key={id}
                     metadata={metadata}
-                    instrumentDisplayName={instrumentData.get(id)!}
+                    instrumentData={instrumentData.get(id)!}
                     onCheckChanged={(beat, checked) => onCheckChanged(id, beat, checked)}
                 />
             )}
@@ -89,11 +90,12 @@ type DrumkitRowProps = {
     metadata: LoopMetadata;
 
     /**
-     * The id of the instrument which corresponds to this row.
+     * The data of the instrument which corresponds to this row, the
+     * information about which beat it plays.
      *
-     * @since v0.0.4
+     * @since v0.0.8
      */
-    instrumentDisplayName: string;
+    instrumentData: [string, Map<Beat, number>];
 
     /**
      * The callback function which is called when the cell at a specific beat
@@ -116,24 +118,24 @@ type DrumkitRowProps = {
  *
  * @see {@link DrumkitGridProps}
  */
-function DrumkitRow({ metadata, instrumentDisplayName, onCheckChanged }: Readonly<DrumkitRowProps>) {
+function DrumkitRow({ metadata, instrumentData, onCheckChanged }: Readonly<DrumkitRowProps>) {
 
     // array 0 - tickCount-1
     // map each tick to a DrumkitCell component for that tick
     let ticks = Array(metadata.tickCount).fill(0).map((_, i) => i);
 
-    const toBeat = (tick: number) => metadata.toBeat(tick);
-
     return (
         <tr className='drumkit-row'>
-            <td className='drumkit-row-instrument'>{instrumentDisplayName}</td>
+            <td className='drumkit-row-instrument'>{instrumentData[0]}</td>
             <td className='drumkit-row-data'>
-                {ticks.map((tick) =>
-                    <DrumkitCell
-                        key={tick}
-                        beat={toBeat(tick)}
-                        onCheckedChanged={(checked) => onCheckChanged(toBeat(tick), checked) }
-                    />
+                {ticks.map((tick) => metadata.toBeat(tick)).map((beat) => {
+                    return (<DrumkitCell
+                        key={metadata.toTick(beat)}
+                        beat={beat}
+                        checked={instrumentData[1].get(beat)!}
+                        onCheckedChanged={(checked) => onCheckChanged(beat, checked) }
+                    />)
+                }
                 )}
             </td>
         </tr>
@@ -158,6 +160,14 @@ type DrumkitCellProps = {
     beat: Beat;
 
     /**
+     * Whether this cell is checked; whether the instrument corresponding to
+     * this beat will play.
+     *
+     * @since v0.0.8
+     */
+    checked: number;
+
+    /**
      * The callback function which is called when the checked state of this
      * cell is changed
      *
@@ -176,12 +186,17 @@ type DrumkitCellProps = {
  *
  * @since v0.0.2
  */
-function DrumkitCell({ beat, onCheckedChanged }: Readonly<DrumkitCellProps>) {
-    const [checked, setChecked] = React.useState(false);
+function DrumkitCell({ beat, checked, onCheckedChanged }: Readonly<DrumkitCellProps>) {
+    const [_checked, _setChecked] = React.useState(checked === 1);
+
+    // https://stackoverflow.com/questions/58818727/react-usestate-not-setting-initial-value#answer-59308313
+    React.useEffect(() => {
+        _setChecked(checked === 1);
+    }, [checked])
 
     const handleChange = () => {
-        let newChecked = !checked;
-        setChecked(newChecked);
+        let newChecked = !_checked;
+        _setChecked(newChecked);
         onCheckedChanged(newChecked);
     };
 
@@ -195,7 +210,7 @@ function DrumkitCell({ beat, onCheckedChanged }: Readonly<DrumkitCellProps>) {
             className={`drumkit-cell-wrapper ${beatClass}`}
             onClick={handleChange}
         >
-            <div className={`drumkit-cell ${checked ? "" : "un"}checked`} />
+            <div className={`drumkit-cell ${_checked ? "" : "un"}checked`} />
         </div>
     );
 }

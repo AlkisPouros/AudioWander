@@ -14,8 +14,16 @@
  */
 class Beat {
 
+    private static cache = new Map<string, Beat>();
+
+    private static getKey(bar: number, beat: number, subdivision: number) {
+        return `${bar}#${beat}#${subdivision}`;
+    }
+
     /**
-     * Creates an instance of the Beat class.
+     * Creates an instance of the Beat class. Creating two Beat instances with
+     * the same bar, beat and subdivision properties will return the same Beat
+     * object (`===` operator will return `true`).
      *
      * @param {number} bar the bar number in the meter
      * @param {number} beat the beat number in the bar
@@ -23,7 +31,18 @@ class Beat {
      *
      * @since v0.0.1
      */
-    constructor(
+    static from(bar: number, beat: number, subdivision: number) {
+        let key = Beat.getKey(bar, beat, subdivision);
+        let cachedBeatExists = Beat.cache.has(key);
+
+        if (!cachedBeatExists) {
+            Beat.cache.set(key, new Beat(bar, beat, subdivision));
+        }
+
+        return Beat.cache.get(key)!;
+    }
+
+    private constructor(
         readonly bar: number,
         readonly beat: number,
         readonly subdivision: number
@@ -118,7 +137,7 @@ class LoopMetadata {
         tick = (tick - beat) / this.beats;
 
         let bar = tick % this.bars;
-        return new Beat(bar + 1, beat + 1, subdivision + 1);
+        return Beat.from(bar + 1, beat + 1, subdivision + 1);
     }
 
     get tickCount(): number {
