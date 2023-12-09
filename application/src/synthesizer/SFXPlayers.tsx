@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import Audio from './Audio';
+import { Analyser } from 'tone';
 
 
 /**
@@ -18,9 +19,9 @@ const SFXPlayers = () => {
     const {initializePlayers,createSFXPlayer,startPlayers,stopPlayers} = Audio;
   
     const [arePlayersPlaying, setArePlayersPlaying] = useState(false);
-    const [playersSelectedFile, setPlayersSelectedFile] = useState<File | null>(null);
+    const [playersSelectedFile, setPlayersSelectedFile] = useState<File[] | null>(null);
     const [playersFileError, setPlayersFileError] = useState<string | null>(null);
-
+	
 	/**
 	 * 
 	 * asynchronous function which handles input file upload events and inside desposes any previous player setups
@@ -48,10 +49,11 @@ const SFXPlayers = () => {
 
 				// Dispose of previous players
 				initializePlayers();
-
+				
+				
 				//upload files
 				createSFXPlayer(validAudioFiles);
-				setPlayersSelectedFile(validAudioFiles[0]);
+				setPlayersSelectedFile(validAudioFiles);
 			}
 		} else {
 			// Update the error state 
