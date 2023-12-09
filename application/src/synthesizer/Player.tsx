@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import * as Tone from "tone";
 import { Decibels } from "tone/build/esm/core/type/Units";
 import Audio from "./Audio";
-import { SFXPlayers } from "./SFXPlayers";
+import WaveSurfer from 'wavesurfer.js';
 
 /**
  * @author Alkis Pouros
@@ -11,14 +11,18 @@ import { SFXPlayers } from "./SFXPlayers";
 
 // Initialize Tone globally
 Tone.start();
-
+type CustomTransportRepeatOptions = {
+	repeat: string;
+	[key: string]: any; // Add any other optional properties you might use
+  };
 const Player = () => {
+	
 	/** We have all the necessary hook functions and state values needed for checking state and values
 	 * of the nodes initialized and imported from the Audio component
 	 * */
 
 	const fileInputRef = useRef<HTMLInputElement>(null);
-	const {player,dist,filter,HighpassFilter,destinationNode,reverb,ping_pong,sfx_players,analyser,mainAnalyser} = Audio;
+	const {player,dist,filter,HighpassFilter,destinationNode,reverb,ping_pong,sfx_players,analyser} = Audio;
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [playbackRate, setPlaybackRate] = useState(1);
 	const [distortion, setValue] = useState(0);
@@ -27,7 +31,9 @@ const Player = () => {
 	const [high_frequency, setHighFrequency] = useState(1500);
 	const [loop, setLoop] = useState(false);
 	const waveformCanvasRef = useRef<HTMLCanvasElement>(null);
-	
+	const [audioFile, setAudioFile] = useState<string>("");
+	const wavesurferRef = useRef<WaveSurfer | null>(null);
+	const wavesurferContainerRef = useRef<HTMLDivElement | string | any>(null);
 	// if a file is selected then the start/stop button element are rendered
 	// if a user decided afterwads to cancel any file upload action and clicks start/stop then an error msessage spawns
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -46,6 +52,9 @@ const Player = () => {
 	 * then you can load the file parsed as a url on the player
 	 * This is done because of the need to handle file upload even when other functions are executing
 	 */
+
+
+	
 	const handleFileChange = async (
 		event: React.ChangeEvent<HTMLInputElement>
 	) => {
@@ -53,6 +62,7 @@ const Player = () => {
 
 		if (files && files.length > 0) {
 			const file = files[0];
+			setAudioFile(URL.createObjectURL(file));
 			setSelectedFile(file);
 			console.log(file);
 			player.dispose(); 
@@ -63,9 +73,6 @@ const Player = () => {
 	};  
 	const clearWaveformCanvas = () => {
 		// Clear the waveform canvas
-		if(isPlaying){
-			setIsPlaying(false);
-		}
 		const canvas = waveformCanvasRef.current;
 		if (canvas) {
 			const canvasContext = canvas.getContext("2d");
@@ -87,7 +94,6 @@ const Player = () => {
 				if (!canvasContext) return;
 
 					const waveform = analyser.getValue();
-					console.log(waveform);
 
 					canvasContext.clearRect(0, 0, canvas.width, canvas.height);
 					canvasContext.lineWidth = 2;
@@ -120,9 +126,55 @@ const Player = () => {
 		} 
 	  }, [isPlaying, analyser]);
 	
+	const startWaveformVisualization = async () => {
+		if (!audioFile) {
+			console.error("No audio file selected");
+			return;
+		  }
+		  // Check if a WaveSurfer instance already exists, destroy it if yes
+		  if (wavesurferRef.current) {
+			wavesurferRef.current.destroy();
+		  }
 	  
+		  // Initialize WaveSurfer
+		  wavesurferRef.current = WaveSurfer.create({
+			container: wavesurferContainerRef.current,
+			waveColor: "#2392f5",
+			progressColor: "#fe0095",
+			cursorColor: "purple",
+			interact: false, // Disable user interaction
+    		
+		  });
+	  
+		  // Load audio file into WaveSurfer
+		  await wavesurferRef.current.load(audioFile);
+		   
+  		  // Mute the audio to prevent playback
+  		   wavesurferRef.current.setMuted(true);
+
+		   // Get Tone.js Transport for synchronization
+  		   const transport = Tone.Transport;
+		  // Start WaveSurfer playback
+		  wavesurferRef.current.on("ready", () => {
+			const duration = (wavesurferRef.current as WaveSurfer).getDuration();
+			// Start both Tone.js and WaveSurfer playback
+	  		transport.start();
+			  const loop = new Tone.Loop((time) => {
+				const percentage = (time / duration) * 100;
+				(wavesurferRef.current as WaveSurfer).seekTo(percentage / 100);
+			  }, "16n");
+		  
+			  // Start the loop
+			  loop.start(0).stop(duration);
+	  		});
+  
+	  		
+			wavesurferRef.current?.play();
+		    
+		
+	};
 	// The startPlayback function is called when user clicks "Start"
-	const startPlayback = () => {
+	const startPlayback = async () => {
 		// check if there is not a file in the buffer (file upload) right now, so user doen't have the right of any action given
 		if (!fileInputRef.current?.value) {
 			setFileError("Please select an audio file before starting");
@@ -152,16 +204,16 @@ const Player = () => {
 			reverb.connect(destinationNode);
 			sfx_players.forEach((player) => {
 				player.connect(destinationNode);
-				player.connect(mainAnalyser);
+				player.connect(analyser);
 			});
-			player.connect(mainAnalyser);
-			mainAnalyser.connect(analyser);
+			player.connect(analyser);
             analyser.connect(destinationNode);
 
 
 			// Start playback when the user clicks "Play"
 			player.start();
-
+			// Start the waveform visualization
+			await startWaveformVisualization();
 			setIsPlaying(true);
 		}
 	};
@@ -182,12 +234,21 @@ const Player = () => {
 			player.stop();
 
 			setIsPlaying(false);
+
 			// Clear the waveform canvas
 			clearWaveformCanvas();
-			
+			// Stop the waveform visualization if needed
+			stopWaveformVisualization();
 		}
 	};
-	
+	const stopWaveformVisualization = () => {
+		// Stop WaveSurfer playback
+		if (wavesurferRef.current) {
+			wavesurferRef.current.stop();
+			wavesurferRef.current.destroy(); // Destroy the WaveSurfer instance
+			wavesurferRef.current = null;
+		  }
+	  };
 	// The speed is being changed and updates the change
 	const changePlaybackRate = (speed: number) => {
 		setPlaybackRate(speed);
@@ -390,7 +451,7 @@ const Player = () => {
 				></input>
 			</label>
 			<canvas ref={waveformCanvasRef} width={900} height={400} style={{border: "1px solid black", height: "200px" }}></canvas>
-			{isPlaying && <> <button onClick={clearWaveformCanvas}>Clear Canvas</button></>}
+			<div ref={wavesurferContainerRef}></div>
 		</div>
 	);
 };
