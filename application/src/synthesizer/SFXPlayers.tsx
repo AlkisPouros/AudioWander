@@ -1,7 +1,6 @@
 import React, { useRef, useState } from 'react';
 import Audio from './Audio';
-import { Analyser } from 'tone';
-
+import { Player } from './Player';
 
 /**
  * 
@@ -74,7 +73,9 @@ const SFXPlayers = () => {
 	};
 	return(
 		<div>
+			<Player stopPlayersPlayback={stopPlayersPlayback}/>
 			<label>
+				
 				Add SFX:
 				{playersFileError && <p style={{ color: "red" }}>{playersFileError}</p>}
 				<input
@@ -96,4 +97,4 @@ const SFXPlayers = () => {
 	);
 
 }
-export {SFXPlayers};
+export { SFXPlayers };

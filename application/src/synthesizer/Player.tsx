@@ -1,8 +1,10 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import * as Tone from "tone";
 import { Decibels } from "tone/build/esm/core/type/Units";
-import Audio from "./Audio";
-import WaveSurfer from 'wavesurfer.js';
+import Audio from './Audio'
+import { WaveformVisualizer } from "./WaveformVisualizer";
+
+
 
 /**
  * @author Alkis Pouros
@@ -11,11 +13,12 @@ import WaveSurfer from 'wavesurfer.js';
 
 // Initialize Tone globally
 Tone.start();
-type CustomTransportRepeatOptions = {
-	repeat: string;
-	[key: string]: any; // Add any other optional properties you might use
-  };
-const Player = () => {
+
+interface PlayerProps {
+	stopPlayersPlayback: () => void;
+  }
+
+const Player: React.FC<PlayerProps> = ({stopPlayersPlayback}) => {
 	
 	/** We have all the necessary hook functions and state values needed for checking state and values
 	 * of the nodes initialized and imported from the Audio component
@@ -30,10 +33,6 @@ const Player = () => {
 	const [frequency, setFrequency] = useState(350);
 	const [high_frequency, setHighFrequency] = useState(1500);
 	const [loop, setLoop] = useState(false);
-	const waveformCanvasRef = useRef<HTMLCanvasElement>(null);
-	const [audioFile, setAudioFile] = useState<string>("");
-	const wavesurferRef = useRef<WaveSurfer | null>(null);
-	const wavesurferContainerRef = useRef<HTMLDivElement | string | any>(null);
 	// if a file is selected then the start/stop button element are rendered
 	// if a user decided afterwads to cancel any file upload action and clicks start/stop then an error msessage spawns
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -43,7 +42,7 @@ const Player = () => {
 	// if there is a file error (which means no audio selected) then a message spawns, otherwise everything is ok
 	const [fileError, setFileError] = useState<string | null>(null);
 	const [check, setCheck] = useState(false);
-	
+	 
 	// All functions from here and on are called by user from the UI as arrow functions for event handlers
 
 	/**
@@ -53,7 +52,7 @@ const Player = () => {
 	 * This is done because of the need to handle file upload even when other functions are executing
 	 */
 
-
+	
 	
 	const handleFileChange = async (
 		event: React.ChangeEvent<HTMLInputElement>
@@ -62,7 +61,6 @@ const Player = () => {
 
 		if (files && files.length > 0) {
 			const file = files[0];
-			setAudioFile(URL.createObjectURL(file));
 			setSelectedFile(file);
 			console.log(file);
 			player.dispose(); 
@@ -71,108 +69,10 @@ const Player = () => {
 			setFileError("No source audio file added");
 		}
 	};  
-	const clearWaveformCanvas = () => {
-		// Clear the waveform canvas
-		const canvas = waveformCanvasRef.current;
-		if (canvas) {
-			const canvasContext = canvas.getContext("2d");
-			if (canvasContext) {
-				canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-			}
-		}
-	};
 	
-	 
-	  
-	useEffect(() => {
-		if (isPlaying) {
-		  const drawWaveform = () => {
-				const canvas = waveformCanvasRef.current;
-				if (!canvas) return;
-		
-				const canvasContext = canvas.getContext("2d");
-				if (!canvasContext) return;
-
-					const waveform = analyser.getValue();
-
-					canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-					canvasContext.lineWidth = 2;
-					
-					const barWidth = canvas.width / waveform.length;
-					
-					const gradient = canvasContext.createLinearGradient(0,0,0,canvas.height);
-					gradient.addColorStop(0.2, "#2392f5");
-					gradient.addColorStop(0.5, "#fe0095");
-					gradient.addColorStop(1.0, "purple");
-					canvasContext.fillStyle = gradient;
-
-					
-			
-					for (let i = 0; i < waveform.length; i++) {
-						const x = i * barWidth;
-						const bar_height = (waveform[i] + 1) / 2 * canvas.height;
-				
-						// Draw the bar with gradient color
-						canvasContext.fillRect(x, canvas.height - bar_height, barWidth ,bar_height);
-					}
-				
-			};
 	
-		  const drawInterval = setInterval(drawWaveform, 30);
 	
-		  return () => {
-			clearInterval(drawInterval);
-		  };
-		} 
-	  }, [isPlaying, analyser]);
 	
-	const startWaveformVisualization = async () => {
-		if (!audioFile) {
-			console.error("No audio file selected");
-			return;
-		  }
-		  // Check if a WaveSurfer instance already exists, destroy it if yes
-		  if (wavesurferRef.current) {
-			wavesurferRef.current.destroy();
-		  }
-	  
-		  // Initialize WaveSurfer
-		  wavesurferRef.current = WaveSurfer.create({
-			container: wavesurferContainerRef.current,
-			waveColor: "#2392f5",
-			progressColor: "#fe0095",
-			cursorColor: "purple",
-			interact: false, // Disable user interaction
-    		
-		  });
-	  
-		  // Load audio file into WaveSurfer
-		  await wavesurferRef.current.load(audioFile);
-		   
-  		  // Mute the audio to prevent playback
-  		   wavesurferRef.current.setMuted(true);
-
-		   // Get Tone.js Transport for synchronization
-  		   const transport = Tone.Transport;
-		  // Start WaveSurfer playback
-		  wavesurferRef.current.on("ready", () => {
-			const duration = (wavesurferRef.current as WaveSurfer).getDuration();
-			// Start both Tone.js and WaveSurfer playback
-	  		transport.start();
-			  const loop = new Tone.Loop((time) => {
-				const percentage = (time / duration) * 100;
-				(wavesurferRef.current as WaveSurfer).seekTo(percentage / 100);
-			  }, "16n");
-		  
-			  // Start the loop
-			  loop.start(0).stop(duration);
-	  		});
-  
-	  		
-			wavesurferRef.current?.play();
-		    
-		
-	};
 	// The startPlayback function is called when user clicks "Start"
 	const startPlayback = async () => {
 		// check if there is not a file in the buffer (file upload) right now, so user doen't have the right of any action given
@@ -207,16 +107,16 @@ const Player = () => {
 				player.connect(analyser);
 			});
 			player.connect(analyser);
+			
             analyser.connect(destinationNode);
-
+			
 
 			// Start playback when the user clicks "Play"
-			player.start();
-			// Start the waveform visualization
-			await startWaveformVisualization();
+			player.start();			
 			setIsPlaying(true);
 		}
 	};
+	
 
 	// The stopPlayback function is called when user clicks "Stop"
 	const stopPlayback = () => {
@@ -227,28 +127,14 @@ const Player = () => {
 		}
 		// If there is a source audio playing right, with the tone.js api we stop it, update the playing state and forcibly stop all sfx players as well
 		if (isPlaying) {
-			sfx_players.forEach((player) => {
-				player.stop();
-				player.disconnect();
-			});
+			stopPlayersPlayback();
 			player.stop();
-
 			setIsPlaying(false);
-
-			// Clear the waveform canvas
-			clearWaveformCanvas();
-			// Stop the waveform visualization if needed
-			stopWaveformVisualization();
+			
+			
 		}
 	};
-	const stopWaveformVisualization = () => {
-		// Stop WaveSurfer playback
-		if (wavesurferRef.current) {
-			wavesurferRef.current.stop();
-			wavesurferRef.current.destroy(); // Destroy the WaveSurfer instance
-			wavesurferRef.current = null;
-		  }
-	  };
+	
 	// The speed is being changed and updates the change
 	const changePlaybackRate = (speed: number) => {
 		setPlaybackRate(speed);
@@ -281,7 +167,7 @@ const Player = () => {
 			console.log(filter.frequency.value);
 		}
 	};
-	// Apply change to Highfrrequency value
+	// Apply change to Highfrequency value
 	const changeFilterFrequency = (freq: number) => {
 		setHighFrequency(freq);
 
@@ -305,7 +191,7 @@ const Player = () => {
 			reverb.decay = decay_value;
 		}
 	};
-	// change the decay va;ue
+	// change the decay value
 	const changeWetValue = (wet_value: number) => {
 		setWetValue(wet_value);
 		if (reverb) {
@@ -450,8 +336,10 @@ const Player = () => {
 					onChange={(e) => isChecked()}
 				></input>
 			</label>
-			<canvas ref={waveformCanvasRef} width={900} height={400} style={{border: "1px solid black", height: "200px" }}></canvas>
-			<div ref={wavesurferContainerRef}></div>
+
+			{isPlaying && <WaveformVisualizer analyser={analyser} isPlaying={isPlaying} player={player}/>}
+			
+			
 		</div>
 	);
 };

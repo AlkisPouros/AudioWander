@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { Drumkit } from './drumkit/Drumkit';
-import  {ModularSynthesizer}  from './synthesizer/ModularSynthesizer';
+import { SFXPlayers } from './synthesizer/SFXPlayers'
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -11,7 +11,7 @@ root.render(
   <React.StrictMode>
     <App />
     <Drumkit />
-    <ModularSynthesizer />
+    <SFXPlayers />
   </React.StrictMode>
 );
 

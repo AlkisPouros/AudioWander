@@ -1,7 +1,7 @@
 import React from 'react';
 import {useRef, useState} from 'react';
 
-let animationController; //to be changed
+let animationController; 
 
 function App() {
   const [file, setFile] = useState<File | null>(null);
