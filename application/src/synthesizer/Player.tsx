@@ -1,10 +1,8 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import * as Tone from "tone";
-import { Decibels } from "tone/build/esm/core/type/Units";
-import Audio from './Audio'
+import { Decibels, NormalRange } from "tone/build/esm/core/type/Units";
+import Audio from "./Audio";
 import { WaveformVisualizer } from "./WaveformVisualizer";
-
-
 
 /**
  * @author Alkis Pouros
@@ -16,23 +14,37 @@ Tone.start();
 
 interface PlayerProps {
 	stopPlayersPlayback: () => void;
-  }
+}
 
-const Player: React.FC<PlayerProps> = ({stopPlayersPlayback}) => {
-	
+const transport = Tone.Transport;
+
+const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 	/** We have all the necessary hook functions and state values needed for checking state and values
 	 * of the nodes initialized and imported from the Audio component
 	 * */
 
 	const fileInputRef = useRef<HTMLInputElement>(null);
-	const {player,dist,filter,HighpassFilter,destinationNode,reverb,ping_pong,sfx_players,analyser} = Audio;
+	const {
+		player,
+		dist,
+		filter,
+		HighpassFilter,
+		destinationNode,
+		reverb,
+		ping_pong,
+		sfx_players,
+		analyser,
+		stereoWidener,
+	} = Audio;
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [playbackRate, setPlaybackRate] = useState(1);
 	const [distortion, setValue] = useState(0);
+	const [width, setWidth] = useState(0.5);
 	const [volume, setVolume] = useState(0);
 	const [frequency, setFrequency] = useState(350);
 	const [high_frequency, setHighFrequency] = useState(1500);
 	const [loop, setLoop] = useState(false);
+	const [currentTime, setCurrentTime] = useState(0);
 	// if a file is selected then the start/stop button element are rendered
 	// if a user decided afterwads to cancel any file upload action and clicks start/stop then an error msessage spawns
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -42,7 +54,8 @@ const Player: React.FC<PlayerProps> = ({stopPlayersPlayback}) => {
 	// if there is a file error (which means no audio selected) then a message spawns, otherwise everything is ok
 	const [fileError, setFileError] = useState<string | null>(null);
 	const [check, setCheck] = useState(false);
-	 
+	const [scheduledEventId, setScheduledEventId] = useState<number | null>(null);
+
 	// All functions from here and on are called by user from the UI as arrow functions for event handlers
 
 	/**
@@ -52,8 +65,6 @@ const Player: React.FC<PlayerProps> = ({stopPlayersPlayback}) => {
 	 * This is done because of the need to handle file upload even when other functions are executing
 	 */
 
-	
-	
 	const handleFileChange = async (
 		event: React.ChangeEvent<HTMLInputElement>
 	) => {
@@ -63,16 +74,14 @@ const Player: React.FC<PlayerProps> = ({stopPlayersPlayback}) => {
 			const file = files[0];
 			setSelectedFile(file);
 			console.log(file);
-			player.dispose(); 
+			player.dispose();
 			await player.load(URL.createObjectURL(file));
+			setCurrentTime(0); // Reset current time when loading a new file
 		} else {
 			setFileError("No source audio file added");
 		}
-	};  
-	
-	
-	
-	
+	};
+
 	// The startPlayback function is called when user clicks "Start"
 	const startPlayback = async () => {
 		// check if there is not a file in the buffer (file upload) right now, so user doen't have the right of any action given
@@ -82,7 +91,7 @@ const Player: React.FC<PlayerProps> = ({stopPlayersPlayback}) => {
 		}
 		if (!player.state || player.state !== "started") {
 			// Start player within the user-initiated event
-			
+
 			setFileError(null);
 			console.log(player.buffer);
 			// Set the initial playback rate
@@ -91,15 +100,25 @@ const Player: React.FC<PlayerProps> = ({stopPlayersPlayback}) => {
 			// Set the initial distortion value
 			dist.distortion = distortion;
 
+			// Set the initial width value
+
+			stereoWidener.width.value = width;
+
 			// Set the initial volume value
 			setVolume(Math.max(Math.min(volume, 0), -40));
 
 			// Chain effects to the player and destination
 			// The effects are applied according with the following order
+
 			player.connect(filter);
 			player.connect(HighpassFilter);
+			player.connect(stereoWidener);
+			stereoWidener.connect(filter);
+			stereoWidener.connect(HighpassFilter);
 			filter.connect(dist);
 			HighpassFilter.connect(dist);
+			stereoWidener.connect(dist);
+			stereoWidener.connect(reverb);
 			dist.connect(reverb);
 			reverb.connect(destinationNode);
 			sfx_players.forEach((player) => {
@@ -107,16 +126,15 @@ const Player: React.FC<PlayerProps> = ({stopPlayersPlayback}) => {
 				player.connect(analyser);
 			});
 			player.connect(analyser);
-			
-            analyser.connect(destinationNode);
-			
 
-			// Start playback when the user clicks "Play"
-			player.start();			
+			analyser.connect(destinationNode);
+
+			//Start the player when the user clicks "play"
+			player.start();
+
 			setIsPlaying(true);
 		}
 	};
-	
 
 	// The stopPlayback function is called when user clicks "Stop"
 	const stopPlayback = () => {
@@ -128,13 +146,47 @@ const Player: React.FC<PlayerProps> = ({stopPlayersPlayback}) => {
 		// If there is a source audio playing right, with the tone.js api we stop it, update the playing state and forcibly stop all sfx players as well
 		if (isPlaying) {
 			stopPlayersPlayback();
+
+			// Stop the player immediately
 			player.stop();
+			// Stop the Transport
+			transport.stop();
+
 			setIsPlaying(false);
-			
-			
+
+			// Reset the slider to its original position
+			setCurrentTime(0);
 		}
 	};
-	
+	const handleSliderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const time = parseFloat(event.target.value);
+		setCurrentTime(time);
+
+		// Set the player's seek position
+		if (player) {
+			player.seek(time);
+
+			// Start the player from the new position
+			if (!isPlaying) {
+				startPlayback();
+			}
+		}
+	};
+
+	useEffect(() => {
+		const updateCurrentTime = (time: number) => {
+			setCurrentTime(time);
+		};
+
+		const eventId = Tone.Transport.scheduleRepeat(updateCurrentTime, "0.01");
+		setScheduledEventId(eventId);
+
+		// Clear the scheduled event when the component is unmounted
+		return () => {
+			Tone.Transport.clear(eventId);
+		};
+	}, []);
+
 	// The speed is being changed and updates the change
 	const changePlaybackRate = (speed: number) => {
 		setPlaybackRate(speed);
@@ -217,8 +269,13 @@ const Player: React.FC<PlayerProps> = ({stopPlayersPlayback}) => {
 			ping_pong.dispose();
 		}
 	};
-    
-    
+	const changeWidth = (width: NormalRange) => {
+		if (stereoWidener) {
+			setWidth(width);
+			stereoWidener.width.value = width;
+		}
+	};
+
 	return (
 		<div>
 			{fileError && <p style={{ color: "red" }}>{fileError}</p>}
@@ -336,10 +393,35 @@ const Player: React.FC<PlayerProps> = ({stopPlayersPlayback}) => {
 					onChange={(e) => isChecked()}
 				></input>
 			</label>
-
-			{isPlaying && <WaveformVisualizer analyser={analyser} isPlaying={isPlaying} player={player}/>}
-			
-			
+			<label>
+				Stereo Widener:
+				<input
+					type='range'
+					step='0.5'
+					min='0.0'
+					max='1.0'
+					value={width}
+					onChange={(e) => changeWidth(parseFloat(e.target.value))}
+				/>
+			</label>
+			<label>
+				Seek:
+				<input
+					type='range'
+					step='0.1'
+					min='0'
+					max={player.loaded ? player.buffer.duration : 0}
+					value={currentTime}
+					onChange={handleSliderChange}
+				/>
+			</label>
+			{isPlaying && (
+				<WaveformVisualizer
+					analyser={analyser}
+					isPlaying={isPlaying}
+					player={player}
+				/>
+			)}
 		</div>
 	);
 };

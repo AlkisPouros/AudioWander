@@ -25,7 +25,7 @@ const WaveformVisualizer: React.FC< WaveformProps > = ({ analyser, isPlaying,pla
             }
             
     };
-    
+    // clearing the canvas after user-triggered audio pause
     useEffect(() => {
       if (!isPlaying || player.state === 'stopped') {
           clearWaveformCanvas();

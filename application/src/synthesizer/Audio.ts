@@ -1,6 +1,6 @@
 import * as Tone from "tone";
 import { SFXPlayers } from "./SFXPlayers";
-import { Player } from './Player';
+
 
 /**
  * @author Alkis Pouros
@@ -19,6 +19,8 @@ const Audio = {
 	reverb: new Tone.Reverb().toDestination(), // reverb node is an effect which applies as an echo/delay one from the web audio api as with the decay/predelay values it does exactly the same and with wet value it makes the sound more fluid enchancing the echo effect
 	ping_pong: new Tone.PingPongDelay().toDestination(), //ping pong allows the source audio to be echoed left and right (with a certain amount of delay and wetness) like a ping pong ball.
 	analyser: new Tone.Waveform(256),
+	stereoWidener: new Tone.StereoWidener(0.5).toDestination(),
+	panner3D: new Tone.Panner3D(0 , 0 , 0).toDestination(),
 	sfx_players,
 	/**
 	 * initialize the sfx players here
