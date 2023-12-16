@@ -32,9 +32,12 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 		destinationNode,
 		reverb,
 		ping_pong,
-		sfx_players,
 		analyser,
 		stereoWidener,
+		sfx_player1,
+		sfx_player2,
+		sfx_player3,
+		sfx_player4
 	} = Audio;
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [playbackRate, setPlaybackRate] = useState(1);
@@ -55,7 +58,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 	const [fileError, setFileError] = useState<string | null>(null);
 	const [check, setCheck] = useState(false);
 	const [scheduledEventId, setScheduledEventId] = useState<number | null>(null);
-
+	
 	// All functions from here and on are called by user from the UI as arrow functions for event handlers
 
 	/**
@@ -103,7 +106,8 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 			// Set the initial width value
 
 			stereoWidener.width.value = width;
-
+			
+			
 			// Set the initial volume value
 			setVolume(Math.max(Math.min(volume, 0), -40));
 
@@ -121,10 +125,10 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 			stereoWidener.connect(reverb);
 			dist.connect(reverb);
 			reverb.connect(destinationNode);
-			sfx_players.forEach((player) => {
-				player.connect(destinationNode);
-				player.connect(analyser);
-			});
+			sfx_player1.connect(destinationNode);
+			sfx_player2.connect(destinationNode);
+			sfx_player3.connect(destinationNode)
+			sfx_player4.connect(destinationNode);
 			player.connect(analyser);
 
 			analyser.connect(destinationNode);
@@ -145,6 +149,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 		}
 		// If there is a source audio playing right, with the tone.js api we stop it, update the playing state and forcibly stop all sfx players as well
 		if (isPlaying) {
+			
 			stopPlayersPlayback();
 
 			// Stop the player immediately
@@ -275,6 +280,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 			stereoWidener.width.value = width;
 		}
 	};
+	
 
 	return (
 		<div>
@@ -415,6 +421,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 					onChange={handleSliderChange}
 				/>
 			</label>
+			
 			{isPlaying && (
 				<WaveformVisualizer
 					analyser={analyser}

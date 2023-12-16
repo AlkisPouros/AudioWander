@@ -1,14 +1,10 @@
 import * as Tone from "tone";
-import { SFXPlayers } from "./SFXPlayers";
-
 
 /**
  * @author Alkis Pouros
  * The Audio component is nessesary for the linking of the player and sfx player component
  * as its functionality is also used inside the player function. It also initializes all the neccessary node objects.
  * */
-
-const sfx_players: Tone.Player[] = []; //An array of independant players needed to upload other sound files (special sound effects) linked to the same destination as the main player
 
 const Audio = {
 	player: new Tone.Player().toDestination(), // Main player node
@@ -20,70 +16,114 @@ const Audio = {
 	ping_pong: new Tone.PingPongDelay().toDestination(), //ping pong allows the source audio to be echoed left and right (with a certain amount of delay and wetness) like a ping pong ball.
 	analyser: new Tone.Waveform(256),
 	stereoWidener: new Tone.StereoWidener(0.5).toDestination(),
-	panner3D: new Tone.Panner3D(0 , 0 , 0).toDestination(),
-	sfx_players,
-	/**
-	 * initialize the sfx players here
-	 */
-	initializePlayers: () => {
-		Audio.sfx_players.forEach((player) => player.dispose());
-		Audio.sfx_players.length = 0;
-	},
+	panner3D: new Tone.Panner3D(0, 0, 0),
+	sfx_player1: new Tone.Player().toDestination(),
+	sfx_player2: new Tone.Player().toDestination(),
+	sfx_player3: new Tone.Player().toDestination(),
+	sfx_player4: new Tone.Player().toDestination(),
+
+	
 	/**
 	 *
 	 * asynchronous function which accepts an array of audio files and returns a promise object
-	 * which uses the now filled file table to load the players into the sfx_players array after parsing
+	 * which uses the now filled file table to load the player into the sfx_player array after parsing
 	 * the file name as a url
 	 */
-	createSFXPlayer: async (file: File[]) => {
-		await Promise.all(
-			file.map(async (file, index) => {
-				const player = new Tone.Player().toDestination();
-				await player.load(URL.createObjectURL(file));
-				Audio.sfx_players.push(player);
-			})
-		);
+	createSFXPlayer: async (player: Tone.Player, file: File) => {
+		try {
+			player = new Tone.Player().toDestination();
+			await player.load(URL.createObjectURL(file));
+			console.log(URL.createObjectURL(file));
+			return player; // Return the player after loading
+		} catch (error) {
+			console.error("error loading audio file");
+			throw error; // Propagate the error
+		}
 	},
 	// start players by using/updating the neccessary paremeters to check the state, following the Players.tsx logic
 	startPlayers: (
 		playersFileInputRef: React.RefObject<HTMLInputElement>,
-		setPlayersFileError: React.Dispatch<React.SetStateAction<String | null>>,
-		arePlayersPlaying: boolean,
-		setArePlayersPlaying: React.Dispatch<React.SetStateAction<boolean | null>>
+		setPlayerFileError: React.Dispatch<React.SetStateAction<String | null>>,
+		isPlayer1Playing: boolean,
+		isPlayer2Playing: boolean,
+		isPlayer3Playing: boolean,
+		isPlayer4Playing: boolean,
+		setPlayer1Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
+		setPlayer2Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
+		setPlayer3Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
+		setPlayer4Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
 	) => {
+		Tone.start();
 		if (!playersFileInputRef.current?.value) {
-			setPlayersFileError("Please select an audio file before starting");
+			setPlayerFileError("Please select an audio file before starting");
 			return;
 		}
 
-		if (!SFXPlayers || !arePlayersPlaying || !Audio.sfx_players) {
-			// Start Tone.js and players within the same user-initiated event
-			Tone.start();
-			setPlayersFileError(null);
-			// Start the players
-			Audio.sfx_players.forEach((player) => {
-				if (player.state !== "started" || !Audio.sfx_players) {
-					console.log();
-					player.start();
-				}
-			});
-
-			setArePlayersPlaying(true);
+		if (!isPlayer1Playing && Audio.sfx_player1) {
+			setPlayerFileError(null);
+			// Start sfx_player1
+			(Audio.sfx_player1 as Tone.Player).start();
+			setPlayer1Playing(true);
+		}
+		if(isPlayer1Playing && !isPlayer2Playing && Audio.sfx_player2 && Audio.sfx_player2.buffer !== null) {
+			console.log("sneaked in");
+			setPlayerFileError(null);
+			// Start sfx_player2
+			(Audio.sfx_player2 as Tone.Player).start();
+			setPlayer2Playing(true);
+		}
+		if(isPlayer1Playing && isPlayer2Playing && !isPlayer3Playing && Audio.sfx_player3 && Audio.sfx_player3.buffer !== null) {
+			console.log("sneaked in");
+			setPlayerFileError(null);
+			// Start sfx_player3
+			(Audio.sfx_player3 as Tone.Player).start();
+			setPlayer3Playing(true);
+		}
+		if(isPlayer1Playing && isPlayer2Playing && isPlayer3Playing && !isPlayer4Playing && Audio.sfx_player4 && Audio.sfx_player4.buffer !== null) {
+			setPlayerFileError(null);
+			// Start sfx_player4
+			(Audio.sfx_player4 as Tone.Player).start();
+			setPlayer4Playing(true);
 		}
 	},
 	// stop players by using/updating the neccessary paremeters to check the state, following the Players.tsx logic
 	stopPlayers: (
-		arePlayersPlaying: boolean,
-		setArePlayersPlaying: React.Dispatch<React.SetStateAction<boolean | null>>
+		playersFileInputRef: React.RefObject<HTMLInputElement>,
+		setPlayerFileError: React.Dispatch<React.SetStateAction<String | null>>,
+		isPlayer1Playing: boolean,
+		isPlayer2Playing: boolean,
+		isPlayer3Playing: boolean,
+		isPlayer4Playing: boolean,
+		setPlayer1Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
+		setPlayer2Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
+		setPlayer3Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
+		setPlayer4Playing: React.Dispatch<React.SetStateAction<boolean | null>>
 	) => {
-		if (sfx_players || arePlayersPlaying || Audio.sfx_players) {
-			// Stop and disconnect the players
-			Audio.sfx_players.forEach((player) => {
-				player.stop();
-				player.disconnect();
-			});
+		if (!playersFileInputRef.current?.value && !Audio.sfx_player1) {
+			setPlayerFileError("Please select an audio file before stopping");
+			return;
+		}
+		if (
+			isPlayer1Playing ||
+			isPlayer2Playing ||
+			isPlayer3Playing ||
+			isPlayer4Playing
+		) {
+			// Forcibly stop and disconnect the players
+			Audio.sfx_player1?.stop();
+			Audio.sfx_player2?.stop();
+			Audio.sfx_player3?.stop();
+			Audio.sfx_player4?.stop();
 
-			setArePlayersPlaying(false);
+			Audio.sfx_player1?.disconnect();
+			Audio.sfx_player2?.disconnect();
+			Audio.sfx_player3?.disconnect();
+			Audio.sfx_player4?.disconnect();
+
+			setPlayer1Playing(false);
+			setPlayer2Playing(false);
+			setPlayer3Playing(false);
+			setPlayer4Playing(false);
 		}
 	},
 };
