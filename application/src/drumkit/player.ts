@@ -4,7 +4,7 @@
  * moments in time according to some data and metadata.
  */
 
-import { LoopMetadata } from './loop';
+import { Beat, LoopMetadata } from './loop';
 
 /**
  * Defines the player class which is responsible for playing the drumkit's
@@ -32,10 +32,14 @@ class Player {
      * @since v0.0.1
      */
     constructor(
-        private readonly metadata: LoopMetadata,
-        private readonly data: Map<number, Array<number>>,
+        private metadata: LoopMetadata,
+        private readonly data: Map<number, Map<Beat, number>>,
         private readonly onPlay: (instrumentId: number, value: number) => void,
     ) { }
+
+    setMetadata(metadata: LoopMetadata) {
+        this.metadata = metadata;
+    }
 
     private currentTick: number = 0;
     private nextTimeout?: NodeJS.Timeout;
@@ -65,13 +69,11 @@ class Player {
     }
 
     private tick() {
-        // TODO: maybe refactor loop outside of tick(),
-        // and player just needs the loop?
-        // maybe not, get each it tick because it might change dynamically?
-
         let time = this.currentTick % this.metadata.tickCount;
-        this.data.forEach((array, id) => {
-            let value = array[time];
+        let beat = this.metadata.toBeat(time);
+
+        this.data.forEach((instrumentData, id) => {
+            let value = instrumentData.get(beat) ?? 0;
             this.onPlay(id, value);
         });
 

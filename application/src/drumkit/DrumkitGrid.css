@@ -1,0 +1,52 @@
+#drumkit-grid {
+    --c-beat-one: #E2A954;
+    --c-beat-beat: #C29551;
+    --c-beat-sub: #947E5D;
+
+    border-collapse: collapse;
+}
+
+.drumkit-row {
+    background-color: var(--c-bg-accent);
+}
+
+.drumkit-row-instrument {
+    font-size: 1.25em;
+    text-align: center;
+    vertical-align: middle;
+    padding: 0.5em 1em;
+}
+
+.drumkit-row-data {
+    padding: 0;
+    display: inline-flex;
+}
+
+.drumkit-cell-wrapper {
+    padding: 10px;
+
+    /* placeholder */
+    --bg-wrapper: white;
+    background-color: var(--bg-wrapper);
+
+    &.beat-one { --bg-wrapper: var(--c-beat-one); }
+
+    &.beat-beat { --bg-wrapper: var(--c-beat-beat); }
+
+    &.beat-sub { --bg-wrapper: var(--c-beat-sub); }
+}
+
+.drumkit-cell {
+    width: 25px;
+    aspect-ratio: 1;
+    border: 2px solid var(--c-border);
+    border-radius: 4px;
+
+    /* placeholder */
+    --bg-cell: white;
+    background-color: var(--bg-cell);
+
+    &.checked { --bg-cell: var(--c-accent); }
+
+    &.unchecked { --bg-cell: var(--c-accent-alt); }
+}

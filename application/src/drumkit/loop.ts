@@ -14,8 +14,16 @@
  */
 class Beat {
 
+    private static cache = new Map<string, Beat>();
+
+    private static getKey(bar: number, beat: number, subdivision: number) {
+        return `${bar}#${beat}#${subdivision}`;
+    }
+
     /**
-     * Creates an instance of the Beat class.
+     * Creates an instance of the Beat class. Creating two Beat instances with
+     * the same bar, beat and subdivision properties will return the same Beat
+     * object (`===` operator will return `true`).
      *
      * @param {number} bar the bar number in the meter
      * @param {number} beat the beat number in the bar
@@ -23,7 +31,18 @@ class Beat {
      *
      * @since v0.0.1
      */
-    constructor(
+    static from(bar: number, beat: number, subdivision: number) {
+        let key = Beat.getKey(bar, beat, subdivision);
+        let cachedBeatExists = Beat.cache.has(key);
+
+        if (!cachedBeatExists) {
+            Beat.cache.set(key, new Beat(bar, beat, subdivision));
+        }
+
+        return Beat.cache.get(key)!;
+    }
+
+    private constructor(
         readonly bar: number,
         readonly beat: number,
         readonly subdivision: number
@@ -118,7 +137,7 @@ class LoopMetadata {
         tick = (tick - beat) / this.beats;
 
         let bar = tick % this.bars;
-        return new Beat(bar + 1, beat + 1, subdivision + 1);
+        return Beat.from(bar + 1, beat + 1, subdivision + 1);
     }
 
     get tickCount(): number {
@@ -168,6 +187,83 @@ class LoopMetadata {
     }
 
     /**
+     * Copy constructor in the form of a static factory method.
+     *
+     * @param other the LoopMetadata object to copy
+     *
+     * @returns a copy of the given LoopMetadata object
+     *
+     * @since v0.0.9
+     */
+    private static from(other: LoopMetadata) {
+        return new LoopMetadata(other.bpm, other.bars, other.beats, other.subdivisions);
+    }
+
+    /**
+     * Returns a new LoopMetadata object, which is a copy of this object but
+     * its bpm is set to the given value.
+     *
+     * @param {number} value the new value for the bpm
+     *
+     * @returns {LoopMetadata} the new LoopMetadata object
+     *
+     * @since v0.0.9
+     */
+    copySetBpm(value: number) {
+        let copy = LoopMetadata.from(this);
+        copy.bpm = value;
+        return copy;
+    }
+
+    /**
+     * Returns a new LoopMetadata object, which is a copy of this object but
+     * its bar count is set to the given value.
+     *
+     * @param {number} value the new value for the bar count
+     *
+     * @returns {LoopMetadata} the new LoopMetadata object
+     *
+     * @since v0.0.9
+     */
+    copySetBars(value: number) {
+        let copy = LoopMetadata.from(this);
+        copy.bars = value;
+        return copy;
+    }
+
+    /**
+     * Returns a new LoopMetadata object, which is a copy of this object but
+     * its beat count is set to the given value.
+     *
+     * @param {number} value the new value for the beat count
+     *
+     * @returns {LoopMetadata} the new LoopMetadata object
+     *
+     * @since v0.0.9
+     */
+    copySetBeats(value: number) {
+        let copy = LoopMetadata.from(this);
+        copy.beats = value;
+        return copy;
+    }
+
+    /**
+     * Returns a new LoopMetadata object, which is a copy of this object but
+     * its subdivision count is set to the given value.
+     *
+     * @param {number} value the new value for the subdivision count
+     *
+     * @returns {LoopMetadata} the new LoopMetadata objec
+     *
+     * @since v0.0.9
+     */
+    copySetSubdivisions(value: number) {
+        let copy = LoopMetadata.from(this);
+        copy.subdivisions = value;
+        return copy;
+    }
+
+    /**
      * Defines constraints for the metadata fields, and provides methods to
      * easily check whether value given is within said constraints.
      *
@@ -196,7 +292,7 @@ class LoopMetadata {
          *
          * @since v0.0.1
          */
-        readonly MAX_BPM = 200;
+        readonly MAX_BPM = 300;
 
         /**
          * Minimum bar count
@@ -210,7 +306,7 @@ class LoopMetadata {
          *
          * @since v0.0.1
          */
-        readonly MAX_BAR_COUNT = 4;
+        readonly MAX_BAR_COUNT = 8;
 
         /**
          * Minimum beat count
@@ -224,7 +320,7 @@ class LoopMetadata {
          *
          * @since v0.0.1
          */
-        readonly MAX_BEAT_COUNT = 4;
+        readonly MAX_BEAT_COUNT = 12;
 
         /**
          * Minimum subdivision count
@@ -238,7 +334,7 @@ class LoopMetadata {
          *
          * @since v0.0.1
          */
-        readonly MAX_SUBDIVISION_COUNT = 3;
+        readonly MAX_SUBDIVISION_COUNT = 8;
 
         /**
          * Checks whether the given BPM is within the constraints of this class.

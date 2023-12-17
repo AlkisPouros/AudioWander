@@ -10,6 +10,8 @@ import { CreateInstrumentListener, InstrumentManager } from './instrument';
 import { Beat, LoopMetadata } from './loop';
 import { Player } from './player';
 import { playAudioBuffer } from '../audio/util';
+import './Drumkit.css'
+import { MetadataController } from './MetadataController';
 
 /**
  * Defines the Drumkit component which consists of a grid of instruments and a
@@ -40,8 +42,7 @@ function Drumkit() {
         const listener: CreateInstrumentListener = (instrumentId) => {
             // TODO: this does trigger a re-render, and as a side-effect the data is also updated
             setInstrumentIds(im.getSortedIds());
-            // TODO: this also does not trigger a re-render. consider changing it so it does
-            setData(data.set(instrumentId, Array(metadata.current.tickCount).fill(0)));
+            setData(data.set(instrumentId, new Map()));
         };
 
         im.addCreateInstrumentListener(listener);
@@ -53,13 +54,18 @@ function Drumkit() {
 
     // --- metadata, data, player ---
 
-    const metadata = React.useRef(new LoopMetadata(120, 2, 3, 1));
+    const [metadata, _setMetadata] = React.useState(new LoopMetadata(60, 2, 2, 3));
+
+    const setMetadata = (metadata: LoopMetadata) => {
+        _setMetadata(metadata);
+        player.current.setMetadata(metadata);
+    }
 
     // map (mutable): instrument id -> array of length `tickCount`, one vlaue for each tick
-    const [data, setData] = React.useState(new Map<number, Array<number>>());
+    const [data, setData] = React.useState(new Map<number, Map<Beat, number>>());
 
     const player = React.useRef(new Player(
-        metadata.current,
+        metadata,
         data,
         (id, value) => instrumentManager.current.play(id, value)
     ));
@@ -76,11 +82,8 @@ function Drumkit() {
 
     const onCheckChanged = (instrumentId: number, beat: Beat, checked: boolean) => {
         let instrumentData = data.get(instrumentId)!;
-        let tick = metadata.current.toTick(beat);
-        instrumentData[tick] = checked ? 1 : 0;
-        // TODO: this does not trigger a re-render. consider changing it so it does
-        // this is only useful when setting drum cells programmatically
-        setData(data.set(instrumentId, instrumentData));
+        instrumentData.set(beat, checked ? 1 : 0);
+        setData(new Map(data.set(instrumentId, instrumentData)));
     }
 
     const onTryCreateInstrument = (displayName: string, blob: Blob) => {
@@ -90,14 +93,18 @@ function Drumkit() {
     // --- the actual drumkit component ---
 
     return (
-        <div>
+        <div id="drumkit">
             <button onClick={start}>Click to start</button>
             <button onClick={stop}>Click to stop</button>
             <p>Open the console to see results (F12)</p>
+            <MetadataController
+                metadata={metadata}
+                onSetMetadata={setMetadata}
+            />
             <DrumkitGrid
-                metadata={metadata.current}
+                metadata={metadata}
                 instrumentData={new Map(instrumentIds.map(
-                    (id) => [id, instrumentManager.current.getDisplayName(id)]
+                    (id) => [id, [instrumentManager.current.getDisplayName(id), data.get(id)!]]
                 ))}
                 onCheckChanged={onCheckChanged}
             />

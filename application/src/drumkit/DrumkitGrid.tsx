@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { Beat, LoopMetadata } from './loop';
+import './DrumkitGrid.css';
 
 /**
  * Defines the props for the DrumkitGrid component.
@@ -26,11 +27,12 @@ type DrumkitGridProps = {
     metadata: LoopMetadata;
 
     /**
-     * The instrument data used to create the grid.
+     * The instrument data used to create the grid. This includes the name of
+     * each instrument, along with the information about which beat it plays.
      *
      * @since v0.0.4
      */
-    instrumentData: Map<number, string>;
+    instrumentData: Map<number, [string, Map<Beat, number>]>;
 
     /**
      * The callback function which is called when the cell of an instrument at
@@ -58,16 +60,16 @@ function DrumkitGrid({ metadata, instrumentData, onCheckChanged }: Readonly<Drum
     let instrumentIds = Array.from(instrumentData.keys()).sort((a, b) => a - b);
 
     return (
-        <div>
+        <table id='drumkit-grid'>
             {instrumentIds.map((id) =>
                 <DrumkitRow
                     key={id}
                     metadata={metadata}
-                    instrumentDisplayName={instrumentData.get(id)!}
+                    instrumentData={instrumentData.get(id)!}
                     onCheckChanged={(beat, checked) => onCheckChanged(id, beat, checked)}
                 />
             )}
-        </div>
+        </table>
     )
 }
 
@@ -88,11 +90,12 @@ type DrumkitRowProps = {
     metadata: LoopMetadata;
 
     /**
-     * The id of the instrument which corresponds to this row.
+     * The data of the instrument which corresponds to this row, the
+     * information about which beat it plays.
      *
-     * @since v0.0.4
+     * @since v0.0.8
      */
-    instrumentDisplayName: string;
+    instrumentData: [string, Map<Beat, number>];
 
     /**
      * The callback function which is called when the cell at a specific beat
@@ -115,31 +118,29 @@ type DrumkitRowProps = {
  *
  * @see {@link DrumkitGridProps}
  */
-function DrumkitRow({ metadata, instrumentDisplayName, onCheckChanged }: Readonly<DrumkitRowProps>) {
+function DrumkitRow({ metadata, instrumentData, onCheckChanged }: Readonly<DrumkitRowProps>) {
 
     // array 0 - tickCount-1
     // map each tick to a DrumkitCell component for that tick
     let ticks = Array(metadata.tickCount).fill(0).map((_, i) => i);
 
     return (
-        <div>
-            <p>{instrumentDisplayName}</p>
-            <div>
-                {ticks.map((tick) =>
-                    <DrumkitCell
-                        key={tick}
-                        onCheckedChanged={(checked) =>
-                            onCheckChanged(metadata.toBeat(tick), checked)
-                        }
-                    />
+        <tr className='drumkit-row'>
+            <td className='drumkit-row-instrument'>{instrumentData[0]}</td>
+            <td className='drumkit-row-data'>
+                {ticks.map((tick) => metadata.toBeat(tick)).map((beat) => {
+                    return (<DrumkitCell
+                        key={metadata.toTick(beat)}
+                        beat={beat}
+                        checked={instrumentData[1].get(beat)!}
+                        onCheckedChanged={(checked) => onCheckChanged(beat, checked) }
+                    />)
+                }
                 )}
-            </div>
-        </div>
+            </td>
+        </tr>
     )
 }
-
-// TODO: contemplate whether beat info is required for the specific slot
-// maybe use beat to style column inside of loop?
 
 /**
  * Defines the props for the DrumkitCell component.
@@ -149,6 +150,22 @@ function DrumkitRow({ metadata, instrumentDisplayName, onCheckChanged }: Readonl
  * @since v0.0.2
  */
 type DrumkitCellProps = {
+
+    /**
+     * The Beat in the loop this cell corresponds to; used to style it
+     * according to its place in the loop.
+     *
+     * @since v0.0.7
+     */
+    beat: Beat;
+
+    /**
+     * Whether this cell is checked; whether the instrument corresponding to
+     * this beat will play.
+     *
+     * @since v0.0.8
+     */
+    checked: number;
 
     /**
      * The callback function which is called when the checked state of this
@@ -169,21 +186,32 @@ type DrumkitCellProps = {
  *
  * @since v0.0.2
  */
-function DrumkitCell({ onCheckedChanged }: Readonly<DrumkitCellProps>) {
-    const [checked, setChecked] = React.useState(false);
+function DrumkitCell({ beat, checked, onCheckedChanged }: Readonly<DrumkitCellProps>) {
+    const [_checked, _setChecked] = React.useState(checked === 1);
+
+    // https://stackoverflow.com/questions/58818727/react-usestate-not-setting-initial-value#answer-59308313
+    React.useEffect(() => {
+        _setChecked(checked === 1);
+    }, [checked])
 
     const handleChange = () => {
-        let newChecked = !checked;
-        setChecked(newChecked);
+        let newChecked = !_checked;
+        _setChecked(newChecked);
         onCheckedChanged(newChecked);
     };
 
+    const isBeat = beat.subdivision === 1;
+    const isOne = isBeat && beat.beat === 1;
+
+    let beatClass = `beat-${isOne ? "one" : isBeat ? "beat" : "sub"}`;
+
     return (
-        <input
-            type="checkbox"
-            checked={checked}
-            onChange={handleChange}
-        />
+        <div
+            className={`drumkit-cell-wrapper ${beatClass}`}
+            onClick={handleChange}
+        >
+            <div className={`drumkit-cell ${_checked ? "" : "un"}checked`} />
+        </div>
     );
 }
 

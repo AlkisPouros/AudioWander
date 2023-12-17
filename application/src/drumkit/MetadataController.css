@@ -1,0 +1,40 @@
+
+#metadata-controller {
+    display: flex;
+    gap: 0.5em;
+    background-color: var(--c-bg-accent);
+    padding: 1em;
+    font-size: 1.5em;
+}
+
+.counter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    &>span { margin-bottom: 0.5em; }
+}
+
+.block {
+    width: 50px;
+    aspect-ratio: 1;
+    line-height: 50px;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.button {
+
+    font-size: 2em;
+
+    --c-bg-normal: #0F325C;
+    --c-bg-hover: #0F3C5C;
+    --c-bg-click: #0F4E5C;
+
+    --c-bg: var(--c-bg-normal);
+    background-color: var(--c-bg);
+
+    &:hover { --c-bg: var(--c-bg-hover); }
+
+    &:active { --c-bg: var(--c-bg-click); }
+}
