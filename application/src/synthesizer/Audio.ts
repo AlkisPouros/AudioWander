@@ -22,7 +22,6 @@ const Audio = {
 	sfx_player3: new Tone.Player().toDestination(),
 	sfx_player4: new Tone.Player().toDestination(),
 
-	
 	/**
 	 *
 	 * asynchronous function which accepts an array of audio files and returns a promise object
@@ -51,7 +50,7 @@ const Audio = {
 		setPlayer1Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
 		setPlayer2Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
 		setPlayer3Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
-		setPlayer4Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
+		setPlayer4Playing: React.Dispatch<React.SetStateAction<boolean | null>>
 	) => {
 		Tone.start();
 		if (!playersFileInputRef.current?.value) {
@@ -65,25 +64,218 @@ const Audio = {
 			(Audio.sfx_player1 as Tone.Player).start();
 			setPlayer1Playing(true);
 		}
-		if(isPlayer1Playing && !isPlayer2Playing && Audio.sfx_player2 && Audio.sfx_player2.buffer !== null) {
+		if (
+			isPlayer1Playing &&
+			!isPlayer2Playing &&
+			Audio.sfx_player2 &&
+			Audio.sfx_player2.buffer !== null
+		) {
 			console.log("sneaked in");
 			setPlayerFileError(null);
 			// Start sfx_player2
 			(Audio.sfx_player2 as Tone.Player).start();
 			setPlayer2Playing(true);
 		}
-		if(isPlayer1Playing && isPlayer2Playing && !isPlayer3Playing && Audio.sfx_player3 && Audio.sfx_player3.buffer !== null) {
+		if (
+			isPlayer1Playing &&
+			isPlayer2Playing &&
+			!isPlayer3Playing &&
+			Audio.sfx_player3 &&
+			Audio.sfx_player3.buffer !== null
+		) {
 			console.log("sneaked in");
 			setPlayerFileError(null);
 			// Start sfx_player3
 			(Audio.sfx_player3 as Tone.Player).start();
 			setPlayer3Playing(true);
 		}
-		if(isPlayer1Playing && isPlayer2Playing && isPlayer3Playing && !isPlayer4Playing && Audio.sfx_player4 && Audio.sfx_player4.buffer !== null) {
+		if (
+			isPlayer1Playing &&
+			isPlayer2Playing &&
+			isPlayer3Playing &&
+			!isPlayer4Playing &&
+			Audio.sfx_player4 &&
+			Audio.sfx_player4.buffer !== null
+		) {
 			setPlayerFileError(null);
 			// Start sfx_player4
 			(Audio.sfx_player4 as Tone.Player).start();
 			setPlayer4Playing(true);
+		}
+	},
+	stopPlayer1: (
+		playersFileInputRef: React.RefObject<HTMLInputElement>,
+		setPlayerFileError: React.Dispatch<React.SetStateAction<String | null>>,
+		isPlayer1Playing: boolean,
+		isPlayer2Playing: boolean,
+		isPlayer3Playing: boolean,
+		isPlayer4Playing: boolean,
+		setPlayer1Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
+		setPlayer2Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
+		setPlayer3Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
+		setPlayer4Playing: React.Dispatch<React.SetStateAction<boolean | null>>
+	) => {
+		if (!playersFileInputRef.current?.value) {
+			setPlayerFileError("Please select an audio file before stopping");
+			return;
+		}
+		
+		if (isPlayer1Playing && Audio.sfx_player1) {
+			(Audio.sfx_player1 as Tone.Player).stop();
+			Audio.sfx_player1.disconnect();
+			setPlayer1Playing(false);
+		}
+	},
+	stopPlayer2: (
+		playersFileInputRef: React.RefObject<HTMLInputElement>,
+		setPlayerFileError: React.Dispatch<React.SetStateAction<String | null>>,
+		isPlayer1Playing: boolean,
+		isPlayer2Playing: boolean,
+		isPlayer3Playing: boolean,
+		isPlayer4Playing: boolean,
+		setPlayer1Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
+		setPlayer2Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
+		setPlayer3Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
+		setPlayer4Playing: React.Dispatch<React.SetStateAction<boolean | null>>
+	) => {
+		if (!playersFileInputRef.current?.value) {
+			setPlayerFileError("Please select an audio file before stopping");
+			return;
+		}
+		if (
+			!isPlayer1Playing &&
+			isPlayer2Playing &&
+			Audio.sfx_player2 &&
+			Audio.sfx_player2.buffer !== null
+		) {
+			(Audio.sfx_player2 as Tone.Player).stop();
+			Audio.sfx_player2.disconnect();
+			setPlayer2Playing(false);
+		}
+	},
+	stopPlayer3: (
+		playersFileInputRef: React.RefObject<HTMLInputElement>,
+		setPlayerFileError: React.Dispatch<React.SetStateAction<String | null>>,
+		isPlayer1Playing: boolean,
+		isPlayer2Playing: boolean,
+		isPlayer3Playing: boolean,
+		isPlayer4Playing: boolean,
+		setPlayer1Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
+		setPlayer2Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
+		setPlayer3Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
+		setPlayer4Playing: React.Dispatch<React.SetStateAction<boolean | null>>
+	) => {
+		if (!playersFileInputRef.current?.value) {
+			setPlayerFileError("Please select an audio file before stopping");
+			return;
+		}
+		
+		if (
+			isPlayer1Playing &&
+			isPlayer2Playing &&
+			!isPlayer3Playing &&
+			Audio.sfx_player3 &&
+			Audio.sfx_player3.buffer !== null
+		) {
+			console.log("sneaked in");
+			// Start sfx_player3
+			(Audio.sfx_player3 as Tone.Player).stop();
+			Audio.sfx_player3.disconnect();
+			setPlayer3Playing(false);
+		}
+	},
+	stopPlayer4: (
+		playersFileInputRef: React.RefObject<HTMLInputElement>,
+		setPlayerFileError: React.Dispatch<React.SetStateAction<String | null>>,
+		isPlayer1Playing: boolean,
+		isPlayer2Playing: boolean,
+		isPlayer3Playing: boolean,
+		isPlayer4Playing: boolean,
+		setPlayer1Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
+		setPlayer2Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
+		setPlayer3Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
+		setPlayer4Playing: React.Dispatch<React.SetStateAction<boolean | null>>
+	) => {
+		if (!playersFileInputRef.current?.value) {
+			setPlayerFileError("Please select an audio file before stopping");
+			return;
+		}
+		if (
+			!isPlayer4Playing &&
+			isPlayer1Playing &&
+			isPlayer2Playing &&
+			isPlayer3Playing
+		) 
+		if (
+			isPlayer1Playing &&
+			isPlayer2Playing &&
+			isPlayer3Playing &&
+			!isPlayer4Playing &&
+			Audio.sfx_player4 &&
+			Audio.sfx_player4.buffer !== null
+		) {
+			// stop sfx_player4
+			(Audio.sfx_player4 as Tone.Player).stop();
+			Audio.sfx_player3.disconnect();
+			setPlayer4Playing(false);
+		}
+	},
+	stopEachPlayer: (
+		playersFileInputRef: React.RefObject<HTMLInputElement>,
+		setPlayerFileError: React.Dispatch<React.SetStateAction<String | null>>,
+		isPlayer1Playing: boolean,
+		isPlayer2Playing: boolean,
+		isPlayer3Playing: boolean,
+		isPlayer4Playing: boolean,
+		setPlayer1Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
+		setPlayer2Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
+		setPlayer3Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
+		setPlayer4Playing: React.Dispatch<React.SetStateAction<boolean | null>>
+	) => {
+		if (!playersFileInputRef.current?.value) {
+			setPlayerFileError("Please select an audio file before stopping");
+			return;
+		}
+		if (isPlayer1Playing && Audio.sfx_player1) {
+			(Audio.sfx_player1 as Tone.Player).stop();
+			Audio.sfx_player1.disconnect();
+			setPlayer1Playing(false);
+		}
+		if (
+			!isPlayer1Playing &&
+			isPlayer2Playing &&
+			Audio.sfx_player2 &&
+			Audio.sfx_player2.buffer !== null
+		) {
+			(Audio.sfx_player2 as Tone.Player).stop();
+			Audio.sfx_player2.disconnect();
+			setPlayer2Playing(false);
+		}
+		if (
+			isPlayer1Playing &&
+			isPlayer2Playing &&
+			!isPlayer3Playing &&
+			Audio.sfx_player3 &&
+			Audio.sfx_player3.buffer !== null
+		) {
+			console.log("sneaked in");
+			// Start sfx_player3
+			(Audio.sfx_player3 as Tone.Player).stop();
+			Audio.sfx_player3.disconnect();
+			setPlayer3Playing(false);
+		}
+		if (
+			isPlayer1Playing &&
+			isPlayer2Playing &&
+			isPlayer3Playing &&
+			!isPlayer4Playing &&
+			Audio.sfx_player4 &&
+			Audio.sfx_player4.buffer !== null
+		) {
+			// stop sfx_player4
+			(Audio.sfx_player4 as Tone.Player).stop();
+			Audio.sfx_player3.disconnect();
+			setPlayer4Playing(false);
 		}
 	},
 	// stop players by using/updating the neccessary paremeters to check the state, following the Players.tsx logic
@@ -99,7 +291,7 @@ const Audio = {
 		setPlayer3Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
 		setPlayer4Playing: React.Dispatch<React.SetStateAction<boolean | null>>
 	) => {
-		if (!playersFileInputRef.current?.value && !Audio.sfx_player1) {
+		if (!playersFileInputRef.current?.value) {
 			setPlayerFileError("Please select an audio file before stopping");
 			return;
 		}

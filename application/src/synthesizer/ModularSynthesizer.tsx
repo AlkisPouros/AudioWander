@@ -1,7 +1,6 @@
 import React, { useRef, useState } from "react";
 import Audio from "./Audio";
 import { Player } from "./Player";
-import * as Tone from "tone";
 
 /**
  *
@@ -14,8 +13,16 @@ const ModularSynthesizer = () => {
 	 *  of the nodes initialized and imported from the Audio component
 	 *  Same as Players component
 	 * */
+	const [audioBufferNames, setAudioBufferNames] = useState<string[]>([]);
 	const playersFileInputRef = useRef<HTMLInputElement>(null);
-	const { createSFXPlayer, startPlayers, stopPlayers } = Audio;
+	const {
+		createSFXPlayer,
+		startPlayers,
+		stopPlayer1,
+		stopPlayer2,
+		stopPlayer3,
+		stopPlayer4,
+	} = Audio;
 
 	const [isPlayer1Playing, setPlayer1Playing] = useState(false);
 	const [isPlayer2Playing, setPlayer2Playing] = useState(false);
@@ -103,6 +110,8 @@ const ModularSynthesizer = () => {
 						console.error("Error creating/loading audio player", error);
 					}
 				}
+				const fileName = file.name;
+				setAudioBufferNames((prevNames) => [...prevNames, fileName]);
 			}
 		} else {
 			// Update the error state
@@ -128,9 +137,102 @@ const ModularSynthesizer = () => {
 			setPlayer3Playing as React.Dispatch<React.SetStateAction<boolean | null>>
 		);
 	};
-
+	const stopPlayer1Playback = () => {
+		stopPlayer1(
+			playersFileInputRef,
+			setPlayerFileError as React.Dispatch<React.SetStateAction<String | null>>,
+			isPlayer1Playing,
+			isPlayer2Playing,
+			isPlayer3Playing,
+			isPlayer4Playing,
+			setPlayer1Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
+			setPlayer2Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
+			setPlayer3Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
+			setPlayer4Playing as React.Dispatch<React.SetStateAction<boolean | null>>
+		);
+	};
+	const stopPlayer2Playback = () => {
+		stopPlayer2(
+			playersFileInputRef,
+			setPlayerFileError as React.Dispatch<React.SetStateAction<String | null>>,
+			isPlayer1Playing,
+			isPlayer2Playing,
+			isPlayer3Playing,
+			isPlayer4Playing,
+			setPlayer1Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
+			setPlayer2Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
+			setPlayer3Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
+			setPlayer4Playing as React.Dispatch<React.SetStateAction<boolean | null>>
+		);
+	};
+	const stopPlayer3Playback = () => {
+		stopPlayer3(
+			playersFileInputRef,
+			setPlayerFileError as React.Dispatch<React.SetStateAction<String | null>>,
+			isPlayer1Playing,
+			isPlayer2Playing,
+			isPlayer3Playing,
+			isPlayer4Playing,
+			setPlayer1Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
+			setPlayer2Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
+			setPlayer3Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
+			setPlayer4Playing as React.Dispatch<React.SetStateAction<boolean | null>>
+		);
+	};
+	const stopPlayer4Playback = () => {
+		stopPlayer4(
+			playersFileInputRef,
+			setPlayerFileError as React.Dispatch<React.SetStateAction<String | null>>,
+			isPlayer1Playing,
+			isPlayer2Playing,
+			isPlayer3Playing,
+			isPlayer4Playing,
+			setPlayer1Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
+			setPlayer2Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
+			setPlayer3Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
+			setPlayer4Playing as React.Dispatch<React.SetStateAction<boolean | null>>
+		);
+	};
 	const stopPlayersPlayback = () => {
-		stopPlayers(
+		stopPlayer1(
+			playersFileInputRef,
+			setPlayerFileError as React.Dispatch<React.SetStateAction<String | null>>,
+			isPlayer1Playing,
+			isPlayer2Playing,
+			isPlayer3Playing,
+			isPlayer4Playing,
+			setPlayer1Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
+			setPlayer2Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
+			setPlayer3Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
+			setPlayer4Playing as React.Dispatch<React.SetStateAction<boolean | null>>
+		);
+
+		stopPlayer2(
+			playersFileInputRef,
+			setPlayerFileError as React.Dispatch<React.SetStateAction<String | null>>,
+			isPlayer1Playing,
+			isPlayer2Playing,
+			isPlayer3Playing,
+			isPlayer4Playing,
+			setPlayer1Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
+			setPlayer2Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
+			setPlayer3Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
+			setPlayer4Playing as React.Dispatch<React.SetStateAction<boolean | null>>
+		);
+
+		stopPlayer3(
+			playersFileInputRef,
+			setPlayerFileError as React.Dispatch<React.SetStateAction<String | null>>,
+			isPlayer1Playing,
+			isPlayer2Playing,
+			isPlayer3Playing,
+			isPlayer4Playing,
+			setPlayer1Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
+			setPlayer2Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
+			setPlayer3Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
+			setPlayer4Playing as React.Dispatch<React.SetStateAction<boolean | null>>
+		);
+		stopPlayer4(
 			playersFileInputRef,
 			setPlayerFileError as React.Dispatch<React.SetStateAction<String | null>>,
 			isPlayer1Playing,
@@ -161,7 +263,15 @@ const ModularSynthesizer = () => {
 					player4SelectedFile) && (
 					<>
 						<button onClick={startPlayersPlayback}>Start sfx</button>
-						<button onClick={stopPlayersPlayback}>Stop sfx</button>
+						<button onClick={stopPlayer1Playback}>Stop SFX 1</button>
+						<button onClick={stopPlayer2Playback}>Stop SFX 2</button>
+						<button onClick={stopPlayer3Playback}>Stop SFX 3</button>
+						<button onClick={stopPlayer4Playback}>Stop SFX 4</button>
+						<ul>
+      						{audioBufferNames.map((name, index) => (
+        					<li key={index}>{name}</li>
+      						))}
+   						</ul>
 					</>
 				)}
 			</label>
