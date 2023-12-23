@@ -4,6 +4,7 @@
  */
 
 import * as Tone from 'tone';
+import { RecorderProxy } from './Recorder'
 
 /**
  * Converts a blob object containing audio data to an AudioBuffer which can be
@@ -32,7 +33,11 @@ const blobToBuffer = async (blob: Blob) => {
  * @since v0.0.6
  */
 const playAudioBuffer = (audioBuffer: AudioBuffer) => {
-    new Tone.Player(audioBuffer).toDestination().start();
+    const player = new Tone.Player(audioBuffer);
+
+    RecorderProxy.connectToRecorder(player);
+
+    player.toDestination().start();
 }
 
 export { blobToBuffer, playAudioBuffer };
