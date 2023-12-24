@@ -3,7 +3,7 @@ import * as Tone from 'tone';
 import React from 'react';
 
 import { RecordingsCollection } from './record/RecordingsCollection';
-import { RecorderControls } from './record/RecorderControls';
+import { RecorderController } from './record/RecorderController';
 import { DownloadList } from './record/DownloadList';
 
 import './Recorder.css'
@@ -45,7 +45,7 @@ function Recorder() {
 
     return (
         <div id="recorder">
-            <RecorderControls
+            <RecorderController
                 start={start}
                 stop={stop}
                 state={recorderState}

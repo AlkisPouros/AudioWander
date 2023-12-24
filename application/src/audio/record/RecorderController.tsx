@@ -1,8 +1,8 @@
-import { RecorderState } from './../Recorder';
+import { RecorderState } from '../Recorder';
 
-import './RecorderControls.css';
+import './RecorderController.css';
 
-type RecorderControlsProps = {
+type RecorderControllerProps = {
 
     start: () => void,
 
@@ -11,7 +11,7 @@ type RecorderControlsProps = {
     state: RecorderState,
 }
 
-function RecorderControls( { start, stop, state }: RecorderControlsProps) {
+function RecorderController( { start, stop, state }: RecorderControllerProps) {
 
     const recordingMsg = state === RecorderState.RECORDING ? "Recording" : "";
 
@@ -19,7 +19,7 @@ function RecorderControls( { start, stop, state }: RecorderControlsProps) {
     const stopEnabled = state === RecorderState.RECORDING;
 
     return (
-        <div id="recorder-controls">
+        <div id="recorder-controller">
             <button
                 className="button-label"
                 onClick={start}
@@ -35,4 +35,4 @@ function RecorderControls( { start, stop, state }: RecorderControlsProps) {
     );
 }
 
-export { RecorderControls };
+export { RecorderController };
