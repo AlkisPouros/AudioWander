@@ -6,6 +6,8 @@ import { RecordingsCollection } from './record/RecordingsCollection';
 import { RecorderControls } from './record/RecorderControls';
 import { DownloadList } from './record/DownloadList';
 
+import './Recorder.css'
+
 const recorder = new Tone.Recorder();
 
 enum RecorderState {
@@ -42,7 +44,7 @@ function Recorder() {
     }
 
     return (
-        <div>
+        <div id="recorder">
             <RecorderControls
                 start={start}
                 stop={stop}

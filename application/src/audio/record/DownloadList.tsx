@@ -14,7 +14,7 @@ type DownloadListProps = {
 function DownloadList( { items, onItemDeleted }: DownloadListProps) {
 
     return (
-        <div>
+        <div id="download-list">
             {items.mapRecordings((index, recording) =>
                 <DownloadItem
                     key={index}
@@ -44,7 +44,7 @@ function DownloadItem( { index, item, onItemDeleted }: DownloadItemProps) {
     const onToggleRename = () => {
         const el = elFormElementDisplayName.current;
         const hidden = el.className.includes("hidden");
-        el.className = hidden ? "" : "hidden";
+        el.className = "form-field" + (hidden ? "" : " hidden");
         elAnchor.current.className = hidden ? "hidden" : "";
     }
 
@@ -59,9 +59,9 @@ function DownloadItem( { index, item, onItemDeleted }: DownloadItemProps) {
     const downloadFileName = displayName.toLowerCase().replace(/\s+/, '_');
 
     return (
-        <div>
-            <button onClick={onItemDeleted}>X</button>
-            <button onClick={onToggleRename}>Rename</button>
+        <div className="download-list-item">
+            <button className="button-label" onClick={onItemDeleted}>X</button>
+            <button className="button-label" onClick={onToggleRename}>Rename</button>
             <a
                 ref={elAnchor}
                 href={item}
@@ -71,7 +71,7 @@ function DownloadItem( { index, item, onItemDeleted }: DownloadItemProps) {
             </a>
             <div
                 ref={elFormElementDisplayName}
-                className="hidden"
+                className="form-field hidden"
             >
                 <input
                     type="text"

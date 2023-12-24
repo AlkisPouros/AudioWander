@@ -1,5 +1,7 @@
 import { RecorderState } from './../Recorder';
 
+import './RecorderControls.css';
+
 type RecorderControlsProps = {
 
     start: () => void,
@@ -17,9 +19,17 @@ function RecorderControls( { start, stop, state }: RecorderControlsProps) {
     const stopEnabled = state === RecorderState.RECORDING;
 
     return (
-        <div>
-            <button onClick={start} disabled={!startEnabled}>Start Recording</button>
-            <button onClick={stop} disabled={!stopEnabled}>Stop Recording</button>
+        <div id="recorder-controls">
+            <button
+                className="button-label"
+                onClick={start}
+                disabled={!startEnabled}
+            >Start Recording</button>
+            <button
+                className="button-label"
+                onClick={stop}
+                disabled={!stopEnabled}
+            >Stop Recording</button>
             <span>{recordingMsg}</span>
         </div>
     );
