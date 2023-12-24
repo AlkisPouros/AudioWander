@@ -44,7 +44,7 @@ function DownloadItem( { index, item, onItemDeleted }: DownloadItemProps) {
     const onToggleRename = () => {
         const el = elFormElementDisplayName.current;
         const hidden = el.className.includes("hidden");
-        el.className = "form-field" + (hidden ? "" : " hidden");
+        el.className = hidden ? "" : " hidden";
         elAnchor.current.className = hidden ? "hidden" : "";
     }
 
@@ -71,7 +71,7 @@ function DownloadItem( { index, item, onItemDeleted }: DownloadItemProps) {
             </a>
             <div
                 ref={elFormElementDisplayName}
-                className="form-field hidden"
+                className="hidden"
             >
                 <input
                     type="text"

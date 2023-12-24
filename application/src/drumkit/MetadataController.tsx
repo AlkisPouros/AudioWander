@@ -247,7 +247,7 @@ function Counter({ name, initial, min, max, step, onSetValue }: CounterProps) {
     }
 
     return (
-        <div className="counter">
+        <div className="controller-counter">
             <span>{name}</span>
             <Button
                 text="+"
@@ -255,7 +255,7 @@ function Counter({ name, initial, min, max, step, onSetValue }: CounterProps) {
             />
             <div
                 ref={elCounter}
-                className="block"
+                className="controller-block"
                 contentEditable="plaintext-only"
                 onInput={(e) => onInput((e.target as HTMLElement).textContent!)}
                 onKeyDown={onKeyDown}
@@ -306,7 +306,7 @@ type ButtonProps = {
  */
 function Button({ text, onClick }: ButtonProps) {
     return (
-        <div className="block button" onClick={onClick}>
+        <div className="controller-block controller-button" onClick={onClick}>
             {text}
         </div>
     )

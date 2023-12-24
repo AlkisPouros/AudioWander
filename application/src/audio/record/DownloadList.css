@@ -1,32 +1,17 @@
 #download-list {
+    padding: 1rem;
+    background-color: var(--c-bg-accent);
+
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.5em;
+    gap: 1em;
+
+    &:empty { display: none; }
 }
 
 .download-list-item {
     display: flex;
     align-items: center;
-    gap: 0.25em;
-}
-
-.form-field {
-    display: inline-flex;
-    flex-direction: row;
-    align-items: flex-start;
     gap: 0.5em;
-
-    & > .error { color: var(--c-text-error); }
-}
-
-.hidden {
-    display: none;
-}
-
-.button-label {
-    all: revert;
-    color: var(--c-text-contrast);
-    background-color: var(--c-bg-contrast);
-    padding: 0.15em 0.3em;
 }

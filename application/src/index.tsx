@@ -5,6 +5,8 @@ import { Drumkit } from './drumkit/Drumkit';
 import  {ModularSynthesizer}  from './synthesizer/ModularSynthesizer';
 import { Recorder } from './audio/Recorder';
 
+import './style.css'
+
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );

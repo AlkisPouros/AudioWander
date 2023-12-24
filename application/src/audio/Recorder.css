@@ -1,11 +1,9 @@
 #recorder {
-    font-family: 'Times New Roman', Times, serif;
-    color: var(--c-text);
-    background-color: var(--c-bg);
-
-    padding: 1em;
+    padding: 1rem;
 
     display: flex;
     flex-direction: column;
+    /* effectively `width: fit-content` for all children */
+    align-items: flex-start;
     gap: 1em;
 }
