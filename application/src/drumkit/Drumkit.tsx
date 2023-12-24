@@ -12,6 +12,11 @@ import { Player } from './player';
 import { playAudioBuffer } from '../audio/util';
 import './Drumkit.css'
 import { MetadataController } from './MetadataController';
+import { DrumkitController } from './DrumkitController';
+
+enum DrumkitState {
+    STOPPED, PLAYING,
+};
 
 /**
  * Defines the Drumkit component which consists of a grid of instruments and a
@@ -72,12 +77,16 @@ function Drumkit() {
 
     // --- callback functions ---
 
+    const [drumkitState, setDrumkitState] = React.useState(DrumkitState.STOPPED);
+
     const start = () => {
         player.current.start();
+        setDrumkitState(DrumkitState.PLAYING);
     }
 
     const stop = () => {
         player.current.stop();
+        setDrumkitState(DrumkitState.STOPPED);
     }
 
     const onCheckChanged = (instrumentId: number, beat: Beat, checked: boolean) => {
@@ -94,9 +103,11 @@ function Drumkit() {
 
     return (
         <div id="drumkit">
-            <button onClick={start}>Click to start</button>
-            <button onClick={stop}>Click to stop</button>
-            <p>Open the console to see results (F12)</p>
+            <DrumkitController
+                start={start}
+                stop={stop}
+                state={drumkitState}
+            />
             <MetadataController
                 metadata={metadata}
                 onSetMetadata={setMetadata}
@@ -115,4 +126,4 @@ function Drumkit() {
     );
 }
 
-export { Drumkit };
+export { Drumkit, DrumkitState };
