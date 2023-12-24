@@ -1,7 +1,5 @@
 import { DrumkitState } from './Drumkit';
 
-import './DrumkitController.css';
-
 type DrumkitControllerProps = {
 
     start: () => void,
@@ -19,7 +17,7 @@ function DrumkitController( { start, stop, state }: DrumkitControllerProps) {
     const stopEnabled = state === DrumkitState.PLAYING;
 
     return (
-        <div id="drumkit-controller">
+        <div className="controller">
             <button
                 className="button-label"
                 onClick={start}

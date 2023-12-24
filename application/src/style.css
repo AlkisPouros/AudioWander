@@ -41,3 +41,13 @@ button,
         background-color: var(--c-button-disabled-bg);
     }
 }
+
+.controller {
+    background-color: var(--c-bg-accent);
+    padding: 1rem;
+
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5em;
+}

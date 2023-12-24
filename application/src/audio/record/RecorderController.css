@@ -1,8 +1,0 @@
-#recorder-controller {
-    background-color: var(--c-bg-accent);
-    padding: 1rem;
-
-    display: inline-flex;
-    flex-direction: row;
-    gap: 0.5em;
-}
