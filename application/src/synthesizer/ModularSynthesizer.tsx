@@ -142,13 +142,7 @@ const ModularSynthesizer = () => {
 			playersFileInputRef,
 			setPlayerFileError as React.Dispatch<React.SetStateAction<String | null>>,
 			isPlayer1Playing,
-			isPlayer2Playing,
-			isPlayer3Playing,
-			isPlayer4Playing,
-			setPlayer1Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
-			setPlayer2Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
-			setPlayer3Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
-			setPlayer4Playing as React.Dispatch<React.SetStateAction<boolean | null>>
+			setPlayer1Playing as React.Dispatch<React.SetStateAction<boolean | null>>
 		);
 	};
 	const stopPlayer2Playback = () => {
@@ -157,12 +151,7 @@ const ModularSynthesizer = () => {
 			setPlayerFileError as React.Dispatch<React.SetStateAction<String | null>>,
 			isPlayer1Playing,
 			isPlayer2Playing,
-			isPlayer3Playing,
-			isPlayer4Playing,
-			setPlayer1Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
-			setPlayer2Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
-			setPlayer3Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
-			setPlayer4Playing as React.Dispatch<React.SetStateAction<boolean | null>>
+			setPlayer2Playing as React.Dispatch<React.SetStateAction<boolean | null>>
 		);
 	};
 	const stopPlayer3Playback = () => {
@@ -172,11 +161,7 @@ const ModularSynthesizer = () => {
 			isPlayer1Playing,
 			isPlayer2Playing,
 			isPlayer3Playing,
-			isPlayer4Playing,
-			setPlayer1Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
-			setPlayer2Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
-			setPlayer3Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
-			setPlayer4Playing as React.Dispatch<React.SetStateAction<boolean | null>>
+			setPlayer3Playing as React.Dispatch<React.SetStateAction<boolean | null>>
 		);
 	};
 	const stopPlayer4Playback = () => {
@@ -187,9 +172,6 @@ const ModularSynthesizer = () => {
 			isPlayer2Playing,
 			isPlayer3Playing,
 			isPlayer4Playing,
-			setPlayer1Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
-			setPlayer2Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
-			setPlayer3Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
 			setPlayer4Playing as React.Dispatch<React.SetStateAction<boolean | null>>
 		);
 	};
@@ -198,13 +180,7 @@ const ModularSynthesizer = () => {
 			playersFileInputRef,
 			setPlayerFileError as React.Dispatch<React.SetStateAction<String | null>>,
 			isPlayer1Playing,
-			isPlayer2Playing,
-			isPlayer3Playing,
-			isPlayer4Playing,
-			setPlayer1Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
-			setPlayer2Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
-			setPlayer3Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
-			setPlayer4Playing as React.Dispatch<React.SetStateAction<boolean | null>>
+			setPlayer1Playing as React.Dispatch<React.SetStateAction<boolean | null>>
 		);
 
 		stopPlayer2(
@@ -212,12 +188,7 @@ const ModularSynthesizer = () => {
 			setPlayerFileError as React.Dispatch<React.SetStateAction<String | null>>,
 			isPlayer1Playing,
 			isPlayer2Playing,
-			isPlayer3Playing,
-			isPlayer4Playing,
-			setPlayer1Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
-			setPlayer2Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
-			setPlayer3Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
-			setPlayer4Playing as React.Dispatch<React.SetStateAction<boolean | null>>
+			setPlayer2Playing as React.Dispatch<React.SetStateAction<boolean | null>>
 		);
 
 		stopPlayer3(
@@ -226,11 +197,7 @@ const ModularSynthesizer = () => {
 			isPlayer1Playing,
 			isPlayer2Playing,
 			isPlayer3Playing,
-			isPlayer4Playing,
-			setPlayer1Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
-			setPlayer2Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
-			setPlayer3Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
-			setPlayer4Playing as React.Dispatch<React.SetStateAction<boolean | null>>
+			setPlayer3Playing as React.Dispatch<React.SetStateAction<boolean | null>>
 		);
 		stopPlayer4(
 			playersFileInputRef,
@@ -239,9 +206,6 @@ const ModularSynthesizer = () => {
 			isPlayer2Playing,
 			isPlayer3Playing,
 			isPlayer4Playing,
-			setPlayer1Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
-			setPlayer2Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
-			setPlayer3Playing as React.Dispatch<React.SetStateAction<boolean | null>>,
 			setPlayer4Playing as React.Dispatch<React.SetStateAction<boolean | null>>
 		);
 	};
@@ -267,11 +231,11 @@ const ModularSynthesizer = () => {
 						<button onClick={stopPlayer2Playback}>Stop SFX 2</button>
 						<button onClick={stopPlayer3Playback}>Stop SFX 3</button>
 						<button onClick={stopPlayer4Playback}>Stop SFX 4</button>
-						<ul>
+						<ol>
       						{audioBufferNames.map((name, index) => (
         					<li key={index}>{name}</li>
       						))}
-   						</ul>
+   						</ol>
 					</>
 				)}
 			</label>

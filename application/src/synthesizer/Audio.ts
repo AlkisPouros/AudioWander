@@ -11,12 +11,10 @@ const Audio = {
 	dist: new Tone.Distortion().toDestination(), // Distortion node, it sets the amount of distortion the sound
 	filter: new Tone.Filter(350, "lowpass").toDestination(), // Lowpass filter sets a lower limit for lower frequencies to pass through, the higher the value the more information will pass
 	HighpassFilter: new Tone.Filter(1500, "highpass").toDestination(), // Highpass filter is the quite opposite of the lowpass filter
-	destinationNode: new Tone.Gain().toDestination(), // Gain node serves as connection point to the output and destination node where upcoming audio signals are "coming together" at a certain volume.
 	reverb: new Tone.Reverb().toDestination(), // reverb node is an effect which applies as an echo/delay one from the web audio api as with the decay/predelay values it does exactly the same and with wet value it makes the sound more fluid enchancing the echo effect
 	ping_pong: new Tone.PingPongDelay().toDestination(), //ping pong allows the source audio to be echoed left and right (with a certain amount of delay and wetness) like a ping pong ball.
-	analyser: new Tone.Waveform(256),
+	analyser: new Tone.Waveform(256).toDestination(),
 	stereoWidener: new Tone.StereoWidener(0.5).toDestination(),
-	panner3D: new Tone.Panner3D(0, 0, 0),
 	sfx_player1: new Tone.Player().toDestination(),
 	sfx_player2: new Tone.Player().toDestination(),
 	sfx_player3: new Tone.Player().toDestination(),
@@ -107,19 +105,13 @@ const Audio = {
 		playersFileInputRef: React.RefObject<HTMLInputElement>,
 		setPlayerFileError: React.Dispatch<React.SetStateAction<String | null>>,
 		isPlayer1Playing: boolean,
-		isPlayer2Playing: boolean,
-		isPlayer3Playing: boolean,
-		isPlayer4Playing: boolean,
-		setPlayer1Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
-		setPlayer2Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
-		setPlayer3Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
-		setPlayer4Playing: React.Dispatch<React.SetStateAction<boolean | null>>
+		setPlayer1Playing: React.Dispatch<React.SetStateAction<boolean | null>>
 	) => {
 		if (!playersFileInputRef.current?.value) {
 			setPlayerFileError("Please select an audio file before stopping");
 			return;
 		}
-		
+
 		if (isPlayer1Playing && Audio.sfx_player1) {
 			(Audio.sfx_player1 as Tone.Player).stop();
 			Audio.sfx_player1.disconnect();
@@ -131,12 +123,7 @@ const Audio = {
 		setPlayerFileError: React.Dispatch<React.SetStateAction<String | null>>,
 		isPlayer1Playing: boolean,
 		isPlayer2Playing: boolean,
-		isPlayer3Playing: boolean,
-		isPlayer4Playing: boolean,
-		setPlayer1Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
-		setPlayer2Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
-		setPlayer3Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
-		setPlayer4Playing: React.Dispatch<React.SetStateAction<boolean | null>>
+		setPlayer2Playing: React.Dispatch<React.SetStateAction<boolean | null>>
 	) => {
 		if (!playersFileInputRef.current?.value) {
 			setPlayerFileError("Please select an audio file before stopping");
@@ -159,17 +146,13 @@ const Audio = {
 		isPlayer1Playing: boolean,
 		isPlayer2Playing: boolean,
 		isPlayer3Playing: boolean,
-		isPlayer4Playing: boolean,
-		setPlayer1Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
-		setPlayer2Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
-		setPlayer3Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
-		setPlayer4Playing: React.Dispatch<React.SetStateAction<boolean | null>>
+		setPlayer3Playing: React.Dispatch<React.SetStateAction<boolean | null>>
 	) => {
 		if (!playersFileInputRef.current?.value) {
 			setPlayerFileError("Please select an audio file before stopping");
 			return;
 		}
-		
+
 		if (
 			isPlayer1Playing &&
 			isPlayer2Playing &&
@@ -191,9 +174,6 @@ const Audio = {
 		isPlayer2Playing: boolean,
 		isPlayer3Playing: boolean,
 		isPlayer4Playing: boolean,
-		setPlayer1Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
-		setPlayer2Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
-		setPlayer3Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
 		setPlayer4Playing: React.Dispatch<React.SetStateAction<boolean | null>>
 	) => {
 		if (!playersFileInputRef.current?.value) {
@@ -205,79 +185,22 @@ const Audio = {
 			isPlayer1Playing &&
 			isPlayer2Playing &&
 			isPlayer3Playing
-		) 
-		if (
-			isPlayer1Playing &&
-			isPlayer2Playing &&
-			isPlayer3Playing &&
-			!isPlayer4Playing &&
-			Audio.sfx_player4 &&
-			Audio.sfx_player4.buffer !== null
-		) {
-			// stop sfx_player4
-			(Audio.sfx_player4 as Tone.Player).stop();
-			Audio.sfx_player3.disconnect();
-			setPlayer4Playing(false);
-		}
+		)
+			if (
+				isPlayer1Playing &&
+				isPlayer2Playing &&
+				isPlayer3Playing &&
+				!isPlayer4Playing &&
+				Audio.sfx_player4 &&
+				Audio.sfx_player4.buffer !== null
+			) {
+				// stop sfx_player4
+				(Audio.sfx_player4 as Tone.Player).stop();
+				Audio.sfx_player3.disconnect();
+				setPlayer4Playing(false);
+			}
 	},
-	stopEachPlayer: (
-		playersFileInputRef: React.RefObject<HTMLInputElement>,
-		setPlayerFileError: React.Dispatch<React.SetStateAction<String | null>>,
-		isPlayer1Playing: boolean,
-		isPlayer2Playing: boolean,
-		isPlayer3Playing: boolean,
-		isPlayer4Playing: boolean,
-		setPlayer1Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
-		setPlayer2Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
-		setPlayer3Playing: React.Dispatch<React.SetStateAction<boolean | null>>,
-		setPlayer4Playing: React.Dispatch<React.SetStateAction<boolean | null>>
-	) => {
-		if (!playersFileInputRef.current?.value) {
-			setPlayerFileError("Please select an audio file before stopping");
-			return;
-		}
-		if (isPlayer1Playing && Audio.sfx_player1) {
-			(Audio.sfx_player1 as Tone.Player).stop();
-			Audio.sfx_player1.disconnect();
-			setPlayer1Playing(false);
-		}
-		if (
-			!isPlayer1Playing &&
-			isPlayer2Playing &&
-			Audio.sfx_player2 &&
-			Audio.sfx_player2.buffer !== null
-		) {
-			(Audio.sfx_player2 as Tone.Player).stop();
-			Audio.sfx_player2.disconnect();
-			setPlayer2Playing(false);
-		}
-		if (
-			isPlayer1Playing &&
-			isPlayer2Playing &&
-			!isPlayer3Playing &&
-			Audio.sfx_player3 &&
-			Audio.sfx_player3.buffer !== null
-		) {
-			console.log("sneaked in");
-			// Start sfx_player3
-			(Audio.sfx_player3 as Tone.Player).stop();
-			Audio.sfx_player3.disconnect();
-			setPlayer3Playing(false);
-		}
-		if (
-			isPlayer1Playing &&
-			isPlayer2Playing &&
-			isPlayer3Playing &&
-			!isPlayer4Playing &&
-			Audio.sfx_player4 &&
-			Audio.sfx_player4.buffer !== null
-		) {
-			// stop sfx_player4
-			(Audio.sfx_player4 as Tone.Player).stop();
-			Audio.sfx_player3.disconnect();
-			setPlayer4Playing(false);
-		}
-	},
+
 	// stop players by using/updating the neccessary paremeters to check the state, following the Players.tsx logic
 	stopPlayers: (
 		playersFileInputRef: React.RefObject<HTMLInputElement>,
