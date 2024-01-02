@@ -25,7 +25,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 	 * */
 
 	const fileInputRef = useRef<HTMLInputElement>(null);
-	const {player,dist,filter,HighpassFilter,reverb,ping_pong,analyser,stereoWidener,main_analyser,sfx_player1,sfx_player2,sfx_player3,sfx_player4} = Audio;
+	const {player,dist,filter,HighpassFilter,reverb,ping_pong,analyser,stereoWidener,sfx_player1,sfx_player2,sfx_player3,sfx_player4} = Audio;
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [playbackRate, setPlaybackRate] = useState(1);
 	const [distortion, setValue] = useState(0);
