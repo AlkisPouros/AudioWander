@@ -1,0 +1,53 @@
+:root {
+    --c-text: #D9D9D9;
+    --c-text-contrast: black;
+    --c-text-error: red;
+    --c-a: hsl(48.7deg 100% 50.51%);
+    --c-accent: #D00000;
+    --c-accent-alt: #0021CE;
+    --c-bg: #081246;
+    --c-bg-accent: #0F1C5C;
+    --c-border: #BBB;
+
+    --c-button-color: #000;
+    --c-button-bg: #E5E5E5;
+    --c-button-disabled-color: #4F526A;
+    --c-button-disabled-bg: #6A6F91;
+
+
+    font-family: 'Times New Roman', Times, serif;
+    color: var(--c-text);
+    background-color: var(--c-bg);
+
+    & .error { color: var(--c-text-error); }
+
+    & .hidden { display: none; }
+}
+
+a {
+    color: var(--c-a);
+}
+
+button,
+.button-label {
+    all: unset;
+    padding: 0.15em 0.3em;
+
+    color: var(--c-button-color);
+    background-color: var(--c-button-bg);
+
+    &:disabled {
+        color: var(--c-button-disabled-color);
+        background-color: var(--c-button-disabled-bg);
+    }
+}
+
+.controller {
+    background-color: var(--c-bg-accent);
+    padding: 1rem;
+
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5em;
+}

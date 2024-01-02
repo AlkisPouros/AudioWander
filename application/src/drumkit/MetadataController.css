@@ -1,13 +1,12 @@
-
 #metadata-controller {
     display: flex;
     gap: 0.5em;
     background-color: var(--c-bg-accent);
-    padding: 1em;
+    padding: 1rem;
     font-size: 1.5em;
 }
 
-.counter {
+.controller-counter {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -15,7 +14,7 @@
     &>span { margin-bottom: 0.5em; }
 }
 
-.block {
+.controller-block {
     width: 50px;
     aspect-ratio: 1;
     line-height: 50px;
@@ -23,7 +22,7 @@
     text-align: center;
 }
 
-.button {
+.controller-button {
 
     font-size: 2em;
 

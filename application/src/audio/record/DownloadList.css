@@ -1,0 +1,17 @@
+#download-list {
+    padding: 1rem;
+    background-color: var(--c-bg-accent);
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1em;
+
+    &:empty { display: none; }
+}
+
+.download-list-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
