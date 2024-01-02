@@ -4,6 +4,7 @@ import { Decibels, NormalRange } from "tone/build/esm/core/type/Units";
 import Audio from "./Audio";
 
 import './Player.css'
+import { RecorderProxy } from "../audio/Recorder";
 
 /**
  * @author Alkis Pouros
@@ -66,8 +67,11 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 			setSelectedFile(file);
 			setFileError(null);
 			console.log(file);
+
 			player.dispose();
 			await player.load(URL.createObjectURL(file));
+			RecorderProxy.connectToRecorder(player);
+
 			setCurrentTime(0); // Reset current time when loading a new file
 		} else {
 			setFileError("No source audio file added");
