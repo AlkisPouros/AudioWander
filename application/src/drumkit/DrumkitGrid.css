@@ -4,6 +4,8 @@
     --c-beat-sub: #947E5D;
 
     border-collapse: collapse;
+
+    &:empty { display: none; }
 }
 
 .drumkit-row {
