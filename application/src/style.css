@@ -42,6 +42,12 @@ button,
     }
 }
 
+.container {
+    background-color: var(--c-bg-accent);
+    padding: 1rem;
+    width: fit-content;
+}
+
 .controller {
     background-color: var(--c-bg-accent);
     padding: 1rem;

@@ -2,8 +2,8 @@ import React, { useRef, useState, useEffect } from "react";
 import * as Tone from "tone";
 import { Decibels, NormalRange } from "tone/build/esm/core/type/Units";
 import Audio from "./Audio";
-import { WaveformVisualizer } from "./WaveformVisualizer";
 
+import './Player.css'
 
 /**
  * @author Alkis Pouros
@@ -340,148 +340,147 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 	
 
 	return (
-		<div>
-			{fileError && <p style={{ color: "red" }}>{fileError}</p>}
-			<input
-				type='file'
-				accept='audio/*'
-				ref={fileInputRef}
-				onChange={handleFileChange}
-			/>
-			{selectedFile && (
-				<>
-					<button onClick={startPlayback}>Play</button>
-					<button onClick={stopPlayback}>Stop</button>
-				</>
-			)}
-			<label>
-				Playback Speed:
+		<div id="player">
+			<div id="audio-file-input" className="container">
 				<input
-					type='range'
-					step='0.1'
-					min='0'
-					max='2.0'
-					value={playbackRate}
-					onChange={(e) => changePlaybackRate(parseFloat(e.target.value))}
+					type='file'
+					accept='audio/*'
+					ref={fileInputRef}
+					onChange={handleFileChange}
 				/>
-			</label>
-			<label>
-				Distortion:
-				<input
-					type='range'
-					step='0.01'
-					min='0'
-					max='1'
-					value={distortion}
-					onChange={(e) => changeDistortionValue(parseFloat(e.target.value))}
-				></input>
-			</label>
+				{fileError && <span className="error">{fileError}</span>}
+				{selectedFile && (
+					<>
+						<button onClick={startPlayback}>Play</button>
+						<button onClick={stopPlayback}>Stop</button>
+					</>
+				)}
+			</div>
+			<div id="sliders" className="container">
+				<label>
+					Playback Speed
+					<input
+						type='range'
+						step='0.1'
+						min='0'
+						max='2.0'
+						value={playbackRate}
+						onChange={(e) => changePlaybackRate(parseFloat(e.target.value))}
+					/>
+				</label>
+				<label>
+					Distortion
+					<input
+						type='range'
+						step='0.01'
+						min='0'
+						max='1'
+						value={distortion}
+						onChange={(e) => changeDistortionValue(parseFloat(e.target.value))}
+					></input>
+				</label>
 
-			<label>
-				Volume:
-				<input
-					type='range'
-					step='1'
-					min='-20'
-					max='20'
-					value={volume}
-					onChange={(e) => changeVolume(parseFloat(e.target.value))}
-				></input>
-			</label>
-			<label>
-				Filter Frequency (lowpass):
-				<input
-					type='range'
-					step='2'
-					min='10'
-					max='20000'
-					value={frequency}
-					onChange={(e) => changeFrequency(parseFloat(e.target.value))}
-				></input>
-			</label>
-			<label>
-				Filter Frequency (highpass)
-				<input
-					type='range'
-					step='2'
-					min='10'
-					max='20000'
-					value={high_frequency}
-					onChange={(e) => changeFilterFrequency(parseFloat(e.target.value))}
-				></input>
-			</label>
-			<label>
-				Loop:
-				<input type='checkbox' checked={loop} onChange={toggleLoop} />
-			</label>
-			<label>
-				Decay:
-				<input
-					type='range'
-					min='0'
-					step='0.1'
-					max='10'
-					value={decay_value}
-					onChange={(e) => changeDecayValue(parseFloat(e.target.value))}
-				></input>
-			</label>
-			<label></label>
-			<label>
-				Wetness:
-				<input
-					type='range'
-					min='0'
-					max='1'
-					step='0.01'
-					value={wet_value}
-					onChange={(e) => changeWetValue(parseFloat(e.target.value))}
-				></input>
-			</label>
-			<label>
-				Pre Delay:
-				<input
-					type='range'
-					min='0'
-					max='1'
-					step='0.01'
-					value={pre_delay}
-					onChange={(e) => preDelayValue(parseFloat(e.target.value))}
-				></input>
-			</label>
-			<label>
-				Ping Pong:
-				<input
-					type='checkbox'
-					checked={check}
-					onChange={(e) => isChecked()}
-				></input>
-			</label>
-			<label>
-				Stereo Widener:
-				<input
-					type='range'
-					step='0.1'
-					min='0.0'
-					max='1.0'
-					value={width}
-					onChange={(e) => changeWidth(parseFloat(e.target.value))}
-				/>
-			</label>
-			<label>
-				Seek:
-				<input
-					type='range'
-					step='0.1'
-					min='0'
-					max={player.loaded ? player.buffer.duration : 0}
-					value={currentTime}
-					onChange={handleSliderChange}
-				/>
-			</label>
-			
-			<WaveformVisualizer
-				analyser={analyser}
-				player={player}/>
+				<label>
+					Volume
+					<input
+						type='range'
+						step='1'
+						min='-20'
+						max='20'
+						value={volume}
+						onChange={(e) => changeVolume(parseFloat(e.target.value))}
+					></input>
+				</label>
+				<label>
+					Lowpass
+					<input
+						type='range'
+						step='2'
+						min='10'
+						max='20000'
+						value={frequency}
+						onChange={(e) => changeFrequency(parseFloat(e.target.value))}
+					></input>
+				</label>
+				<label>
+					Highpass
+					<input
+						type='range'
+						step='2'
+						min='10'
+						max='20000'
+						value={high_frequency}
+						onChange={(e) => changeFilterFrequency(parseFloat(e.target.value))}
+					></input>
+				</label>
+				<label>
+					Loop
+					<input type='checkbox' checked={loop} onChange={toggleLoop} />
+				</label>
+				<label>
+					Decay
+					<input
+						type='range'
+						min='0'
+						step='0.1'
+						max='10'
+						value={decay_value}
+						onChange={(e) => changeDecayValue(parseFloat(e.target.value))}
+					></input>
+				</label>
+				<label>
+					Wetness
+					<input
+						type='range'
+						min='0'
+						max='1'
+						step='0.01'
+						value={wet_value}
+						onChange={(e) => changeWetValue(parseFloat(e.target.value))}
+					></input>
+				</label>
+				<label>
+					Pre Delay
+					<input
+						type='range'
+						min='0'
+						max='1'
+						step='0.01'
+						value={pre_delay}
+						onChange={(e) => preDelayValue(parseFloat(e.target.value))}
+					></input>
+				</label>
+				<label>
+					Ping Pong
+					<input
+						type='checkbox'
+						checked={check}
+						onChange={(e) => isChecked()}
+					></input>
+				</label>
+				<label>
+					Stereo Widener
+					<input
+						type='range'
+						step='0.1'
+						min='0.0'
+						max='1.0'
+						value={width}
+						onChange={(e) => changeWidth(parseFloat(e.target.value))}
+					/>
+				</label>
+				<label>
+					Seek
+					<input
+						type='range'
+						step='0.1'
+						min='0'
+						max={player.loaded ? player.buffer.duration : 0}
+						value={currentTime}
+						onChange={handleSliderChange}
+					/>
+				</label>
+			</div>
 		</div>
 	);
 };
