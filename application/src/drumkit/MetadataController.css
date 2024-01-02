@@ -1,8 +1,6 @@
 #metadata-controller {
     display: flex;
     gap: 0.5em;
-    background-color: var(--c-bg-accent);
-    padding: 1rem;
     font-size: 1.5em;
 }
 

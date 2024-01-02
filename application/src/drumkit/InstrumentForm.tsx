@@ -187,7 +187,7 @@ function InstrumentForm({ onTryCreateInstrument }: InstrumentFormProps) {
     }
 
     return (
-        <form ref={elForm} id="instrument-form" noValidate onSubmit={onSubmit}>
+        <form ref={elForm} id="instrument-form" className="container" noValidate onSubmit={onSubmit}>
             <div className="form-field">
                 <label
                     htmlFor="display-name-input"

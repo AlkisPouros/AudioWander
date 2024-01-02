@@ -17,7 +17,7 @@ function RecorderController( { start, stop, state }: RecorderControllerProps) {
     const stopEnabled = state === RecorderState.RECORDING;
 
     return (
-        <div className="controller">
+        <div className="controller container">
             <button
                 className="button-label"
                 onClick={start}

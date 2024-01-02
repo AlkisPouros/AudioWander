@@ -1,7 +1,4 @@
 #instrument-form {
-    padding: 1em;
-    background-color: var(--c-bg-accent);
-
     display: flex;
     flex-direction: column;
     gap: 0.75em;

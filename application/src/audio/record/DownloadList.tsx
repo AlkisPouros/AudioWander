@@ -14,7 +14,7 @@ type DownloadListProps = {
 function DownloadList( { items, onItemDeleted }: DownloadListProps) {
 
     return (
-        <div id="download-list">
+        <div id="download-list" className="container">
             {items.mapRecordings((index, recording) =>
                 <DownloadItem
                     key={index}

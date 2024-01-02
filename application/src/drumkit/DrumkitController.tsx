@@ -17,7 +17,7 @@ function DrumkitController( { start, stop, state }: DrumkitControllerProps) {
     const stopEnabled = state === DrumkitState.PLAYING;
 
     return (
-        <div className="controller">
+        <div className="controller container">
             <button
                 className="button-label"
                 onClick={start}

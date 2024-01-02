@@ -43,7 +43,7 @@ type MetadataControllerProps = {
 function MetadataController({ metadata, onSetMetadata }: MetadataControllerProps) {
 
     return (
-        <div id="metadata-controller">
+        <div id="metadata-controller" className="container">
             <Counter
                 name="BPM"
                 initial={metadata.bpm}
