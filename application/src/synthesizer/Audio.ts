@@ -1,4 +1,5 @@
 import * as Tone from "tone";
+import { RecorderProxy } from "../audio/Recorder";
 
 /**
  * @author Alkis Pouros
@@ -29,6 +30,7 @@ const Audio = {
 	createSFXPlayer: async (player: Tone.Player, file: File) => {
 		try {
 			player = new Tone.Player().toDestination();
+			RecorderProxy.connectToRecorder(player);
 			await player.load(URL.createObjectURL(file));
 			console.log(URL.createObjectURL(file));
 			return player; // Return the player after loading

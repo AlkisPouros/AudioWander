@@ -1,0 +1,33 @@
+#player {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    & #audio-file-input {
+        display: flex;
+        gap: 0.5em;
+        align-items: center;
+    }
+
+    & #sliders {
+        width: fit-content;
+
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-evenly;
+        gap: 1em;
+
+        & label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        & input[type="range"] {
+            appearance: slider-vertical;
+
+            width: 50px;
+        }
+    }
+}

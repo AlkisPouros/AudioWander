@@ -187,7 +187,7 @@ function InstrumentForm({ onTryCreateInstrument }: InstrumentFormProps) {
     }
 
     return (
-        <form ref={elForm} id="instrument-form" noValidate onSubmit={onSubmit}>
+        <form ref={elForm} id="instrument-form" className="container" noValidate onSubmit={onSubmit}>
             <div className="form-field">
                 <label
                     htmlFor="display-name-input"
@@ -210,7 +210,7 @@ function InstrumentForm({ onTryCreateInstrument }: InstrumentFormProps) {
                 >Choose an Audio File</label>
                 <input
                     ref={elInputAudio}
-                    className="input-hidden"
+                    className="hidden"
                     id="audio-input"
                     type="file"
                     accept="audio/*"
@@ -226,7 +226,7 @@ function InstrumentForm({ onTryCreateInstrument }: InstrumentFormProps) {
             </div>
             <div>
                 <label htmlFor="submit" className="button-label">Submit</label>
-                <input className="input-hidden" type="submit" id="submit"></input>
+                <input className="hidden" type="submit" id="submit"></input>
             </div>
         </form>
     )

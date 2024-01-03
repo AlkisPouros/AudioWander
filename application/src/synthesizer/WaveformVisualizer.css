@@ -1,0 +1,11 @@
+#waveform-visualiser {
+
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+
+    & canvas {
+        width: 600px;
+        height: 300px;
+    }
+}

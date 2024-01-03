@@ -1,6 +1,9 @@
 import React, { useRef, useState } from "react";
 import Audio from "./Audio";
 import { Player } from "./Player";
+import { WaveformVisualizer } from "./WaveformVisualizer";
+
+import './ModularSynthesizer.css'
 
 /**
  *
@@ -210,35 +213,40 @@ const ModularSynthesizer = () => {
 		);
 	};
 	return (
-		<div>
+		<div id="modular-synth">
 			<Player stopPlayersPlayback={stopPlayersPlayback} />
-			<label>
-				Add SFX:
-				{playerFileError && <p style={{ color: "red" }}>{playerFileError}</p>}
-				<input
-					type='file'
-					accept='audio/*'
-					ref={playersFileInputRef}
-					onChange={handleSFXFileChange}
-				></input>
-				{(player1SelectedFile ||
-					player2SelectedFile ||
-					player3SelectedFile ||
-					player4SelectedFile) && (
-					<>
-						<button onClick={startPlayersPlayback}>Start sfx</button>
-						<button onClick={stopPlayer1Playback}>Stop SFX 1</button>
-						<button onClick={stopPlayer2Playback}>Stop SFX 2</button>
-						<button onClick={stopPlayer3Playback}>Stop SFX 3</button>
-						<button onClick={stopPlayer4Playback}>Stop SFX 4</button>
-						<ol>
-      						{audioBufferNames.map((name, index) => (
-        					<li key={index}>{name}</li>
-      						))}
-   						</ol>
-					</>
-				)}
-			</label>
+			<WaveformVisualizer
+				analyser={Audio.analyser}
+				player={Audio.player}/>
+			<div className="container">
+				<label>
+					Add SFX:
+					{playerFileError && <p style={{ color: "red" }}>{playerFileError}</p>}
+					<input
+						type='file'
+						accept='audio/*'
+						ref={playersFileInputRef}
+						onChange={handleSFXFileChange}
+					></input>
+					{(player1SelectedFile ||
+						player2SelectedFile ||
+						player3SelectedFile ||
+						player4SelectedFile) && (
+						<>
+							<button onClick={startPlayersPlayback}>Start sfx</button>
+							<button onClick={stopPlayer1Playback}>Stop SFX 1</button>
+							<button onClick={stopPlayer2Playback}>Stop SFX 2</button>
+							<button onClick={stopPlayer3Playback}>Stop SFX 3</button>
+							<button onClick={stopPlayer4Playback}>Stop SFX 4</button>
+						</>
+					)}
+				</label>
+				<ol>
+					{audioBufferNames.map((name, index) => (
+						<li key={index}>{name}</li>
+					))}
+				</ol>
+			</div>
 		</div>
 	);
 };

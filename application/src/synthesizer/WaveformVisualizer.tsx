@@ -1,6 +1,8 @@
 import { useRef, useEffect } from "react";
 import * as Tone from "tone";
 
+import './WaveformVisualizer.css'
+
 interface WaveformProps {
 	analyser: Tone.Waveform;
 	player: Tone.Player;
@@ -72,9 +74,9 @@ const WaveformVisualizer: React.FC<WaveformProps> = ({analyser,player}) => {
 	
 
 	return (
-		<div>
-      		<canvas ref={waveformCanvasRef} width={400} height={200} style={{border: "1px solid black", height: "200px" }}></canvas>
-    	</div>
+		<div id="waveform-visualiser">
+			<canvas ref={waveformCanvasRef}></canvas>
+		</div>
 	);
 };
 
