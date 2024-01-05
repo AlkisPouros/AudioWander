@@ -2,8 +2,9 @@ import React, { useRef, useState, useEffect } from "react";
 import * as Tone from "tone";
 import { Decibels, NormalRange } from "tone/build/esm/core/type/Units";
 import Audio from "./Audio";
-
-import './Player.css'
+import { Toggle } from "./Toggle";
+import { Toggle2 } from "./Toggle2";
+import "./Player.css";
 import { RecorderProxy } from "../audio/Recorder";
 
 /**
@@ -26,7 +27,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 	 * */
 
 	const fileInputRef = useRef<HTMLInputElement>(null);
-	const {player,dist,filter,HighpassFilter,reverb,ping_pong,analyser,stereoWidener,sfx_player1,sfx_player2,sfx_player3,sfx_player4} = Audio;
+	const {player,dist,filter,HighpassFilter,reverb,ping_pong,analyser,stereoWidener,sfx_player1,sfx_player2,sfx_player3,sfx_player4,} = Audio;
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [playbackRate, setPlaybackRate] = useState(1);
 	const [distortion, setValue] = useState(0);
@@ -46,7 +47,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 	const [fileError, setFileError] = useState<string | null>(null);
 	const [check, setCheck] = useState(false);
 	const [scheduledEventId, setScheduledEventId] = useState<number | null>(null);
-	
+
 	// All functions from here and on are called by user from the UI as arrow functions for event handlers
 
 	/**
@@ -56,7 +57,6 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 	 * This is done because of the need to handle file upload even when other functions are executing
 	 */
 
-	
 	const handleFileChange = async (
 		event: React.ChangeEvent<HTMLInputElement>
 	) => {
@@ -77,7 +77,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 			setFileError("No source audio file added");
 		}
 	};
-	
+
 	// The startPlayback function is called when user clicks "Start"
 	const startPlayback = async () => {
 		// check if there is not a file in the buffer (file upload) right now, so user doen't have the right of any action given
@@ -99,14 +99,13 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 			// Set the initial width value
 
 			stereoWidener.width.value = width;
-			
-			
+
 			// Set the initial volume value
 			setVolume(Math.max(Math.min(volume, 0), -40));
 
 			// Chain effects to the player and destination Node
-			// Connect the player to the effects chain			
-			
+			// Connect the player to the effects chain
+
 			player.connect(analyser);
 			HighpassFilter.connect(analyser);
 			filter.connect(analyser);
@@ -114,13 +113,11 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 			dist.connect(analyser);
 			reverb.connect(analyser);
 			ping_pong.connect(analyser);
-			
 
 			sfx_player1.connect(analyser);
 			sfx_player2.connect(analyser);
 			sfx_player3.connect(analyser);
 			sfx_player4.connect(analyser);
-			
 
 			//Start the player when the user clicks "play"
 			player.start();
@@ -138,15 +135,19 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 		}
 		// If there is a source audio playing right, with the tone.js api we stop it, update the playing state and forcibly stop all sfx players as well
 		if (isPlaying) {
-			
-			if(sfx_player1.state === "started" || sfx_player2.state === "started" || sfx_player3.state === "started" || sfx_player4.state === "started")
+			if (
+				sfx_player1.state === "started" ||
+				sfx_player2.state === "started" ||
+				sfx_player3.state === "started" ||
+				sfx_player4.state === "started"
+			)
 				stopPlayersPlayback();
 
 			// Stop the player immediately
 			player.stop();
 			// Stop the Transport
 			transport.stop();
-			
+
 			setIsPlaying(false);
 
 			// Reset the slider to its original position
@@ -169,7 +170,6 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 		}
 	};
 
-	
 	useEffect(() => {
 		const updateCurrentTime = (time: number) => {
 			setCurrentTime(time);
@@ -183,39 +183,49 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 			Tone.Transport.clear(eventId);
 		};
 	}, []);
-	
+
 	// The speed is being changed and updates the change
 	const changePlaybackRate = (speed: number) => {
-		setPlaybackRate(speed);
-		if (player) {
-			player.playbackRate = speed;
+		try {
+			setPlaybackRate(speed);
+			if (player) {
+				player.playbackRate = speed;
+			}
+		} catch (error) {
+			console.log("error");
 		}
 	};
 	// the distortion value is being changed
 	// Usually a value between 0 and 1
 	const changeDistortionValue = (amount: number) => {
-		setValue(amount);
-		if (dist) {
-			dist.distortion = amount;
-		}
-		if(dist.distortion !== 0 && player.state === "started")
-		{
+		try {
+			setValue(amount);
+			if (dist) {
+				dist.distortion = amount;
+			}
+			if (dist.distortion !== 0 && player.state === "started") {
 				player.connect(dist);
-		}
-		else{
+			} else {
 				player.disconnect(dist);
+			}
+		} catch (error) {
+			console.log("error");
 		}
 	};
 	// Change the volume using rampTo, which performs the increase/decrease of the in 0.1 secs.
 	const changeVolume = (sound: Decibels) => {
-		setVolume(sound);
-		if (player) {
-			player.volume.rampTo(sound, 0.1);
+		try {
+			setVolume(sound);
+			if (player) {
+				player.volume.rampTo(sound, 0.1);
+			}
+		} catch (error) {
+			console.log("error");
 		}
 	};
 	// Apply change to lowpass frequency value
 	const changeFrequency = (freq: number) => {
-		try{
+		try {
 			setFrequency(freq);
 			if (filter) {
 				// Set the filter frequency to the new value
@@ -223,136 +233,153 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 
 				console.log(filter.frequency.value);
 			}
-			if(filter.frequency.value !== 350 && player.state === "started")
-			{
+			if (filter.frequency.value !== 350 && player.state === "started") {
 				player.connect(filter);
-			}
-			else{
+			} else {
 				player.disconnect(filter);
 			}
-		}catch(error)
-		{
+		} catch (error) {
 			console.log("there was a runtime error!");
 		}
 	};
 	// Apply change to Highfrequency value
 	const changeFilterFrequency = (freq: number) => {
-		setHighFrequency(freq);
+		try {
+			setHighFrequency(freq);
 
-		if (HighpassFilter) {
-			HighpassFilter.frequency.rampTo(freq, 0, 1);
-			console.log(HighpassFilter.frequency.value);
-		}
-		if(HighpassFilter.frequency.value !== 1500 && player.state === "started")
-		{
-			player.connect(HighpassFilter);
-		}
-		else{
-			player.disconnect(HighpassFilter);
+			if (HighpassFilter) {
+				HighpassFilter.frequency.rampTo(freq, 0, 1);
+				console.log(HighpassFilter.frequency.value);
+			}
+			if (
+				HighpassFilter.frequency.value !== 1500 &&
+				player.state === "started"
+			) {
+				player.connect(HighpassFilter);
+			} else {
+				player.disconnect(HighpassFilter);
+			}
+		} catch (error) {
+			console.log("error");
 		}
 	};
-	// Check is player is looped
+	// Apply Looped playback
 	const toggleLoop = () => {
-		const newLoopValue = !loop;
-		setLoop(newLoopValue);
-		if (player) {
-			player.loop = !loop;
+		try {
+			const newLoopValue = !loop;
+			setLoop(newLoopValue);
+			if (player) {
+				player.loop = !loop;
+			}
+		} catch (error) {
+			console.log("error");
 		}
 	};
-	// Chnange the decay value
+	// Change the decay value
 	const changeDecayValue = (decay_value: number) => {
-		setDecayValue(decay_value);
-		if (reverb) {
-			reverb.decay = decay_value;
-		}
-		if(reverb.decay !== 0 && player.state === "started")
+		try{
+
+		
+			setDecayValue(decay_value);
+			if (reverb) {
+				reverb.decay = decay_value;
+			}
+			if (reverb.decay !== 0 && player.state === "started") {
+				player.connect(reverb);
+			} else {
+				player.disconnect(reverb);
+			}
+		}catch(error)
 		{
-			player.connect(reverb);
-		}
-		else{
-			player.disconnect(reverb);
+			console.log("error");
 		}
 	};
 	// change the decay value
 	const changeWetValue = (wet_value: number) => {
-		setWetValue(wet_value);
-		if (reverb) {
-			reverb.wet.value = wet_value;
-		}
-		if(reverb.preDelay !== 0){
-			console.log("nothing");
-		}
-		else if(reverb.decay !== 0)
-		{
-			console.log("nothing");
-		}
-		else if(reverb.wet.value !== 0 && player.state === "started")
-		{
-			player.connect(reverb);
-		}
-		else{
-			player.disconnect(reverb);
+		try {
+			setWetValue(wet_value);
+			if (reverb) {
+				reverb.wet.value = wet_value;
+			}
+			if (reverb.preDelay !== 0) {
+				console.log("nothing");
+			} else if (reverb.decay !== 0) {
+				console.log("nothing");
+			} else if (reverb.wet.value !== 0 && player.state === "started") {
+				player.connect(reverb);
+			} else {
+				player.disconnect(reverb);
+			}
+		} catch (error) {
+			console.log("error");
 		}
 	};
 	// change the predelay value
 	const preDelayValue = (pre_delay: number) => {
-		setPreDelay(pre_delay);
-		if (reverb) {
-			reverb.preDelay = pre_delay;
-		}
-		if(reverb.wet.value !== 0){
-			console.log("nothing");
-		}
-		else if(reverb.decay !== 0)
-		{
-			console.log("nothing");
-		}
-		else if(reverb.preDelay !== 0 && player.state === "started")
-		{
-			player.connect(reverb);
-		}
-		else{
-			player.disconnect(reverb);
+		try {
+			setPreDelay(pre_delay);
+			if (reverb) {
+				reverb.preDelay = pre_delay;
+			}
+			if (reverb.wet.value !== 0) {
+				console.log("nothing");
+			} else if (reverb.decay !== 0) {
+				console.log("nothing");
+			} else if (reverb.preDelay !== 0 && player.state === "started") {
+				player.connect(reverb);
+			} else {
+				player.disconnect(reverb);
+			}
+		} catch (error) {
+			console.log("error");
 		}
 	};
 	// toggle on/off ping pong delay effect
 	const isChecked = () => {
-		const newValue = !check;
-		setCheck(newValue);
+		try {
+			const newValue = !check;
+			setCheck(newValue);
 
-		if (newValue === true && player.state === "started") {
-			player.connect(ping_pong);
-		} else {
-			player.disconnect(ping_pong);
-			ping_pong.dispose();
+			if (newValue === true && player.state === "started") {
+				player.connect(ping_pong);
+			} else {
+				player.disconnect(ping_pong);
+				ping_pong.dispose();
+			}
+		} catch (error) {
+			console.log("error");
 		}
 	};
 	const changeWidth = (width: NormalRange) => {
-		if (stereoWidener) {
-			setWidth(width);
-			stereoWidener.width.value = width;
-		}
-		if(stereoWidener.width.value !== (0.5 as NormalRange) && player.state === "started")
-		{
-			console.log("we are changing width");
-			player.connect(stereoWidener);
-		}
-		else{
-			player.disconnect(stereoWidener);
+		try {
+			if (stereoWidener) {
+				setWidth(width);
+				stereoWidener.width.value = width;
+			}
+			if (
+				stereoWidener.width.value !== (0.5 as NormalRange) &&
+				player.state === "started"
+			) {
+				console.log("we are changing width");
+				player.connect(stereoWidener);
+			} else {
+				player.disconnect(stereoWidener);
+			}
+		} catch (error) {
+			console.log("error");
 		}
 	};
-	
 
 	return (
-		<div id="player">
-			<div id="audio-file-input" className="container">
+		<div id='player'>
+			<div id='audio-file-input' className='container'>
 				<input
 					type='file'
 					accept='audio/*'
 					ref={fileInputRef}
 					onChange={handleFileChange}
 				/>
-				{fileError && <span className="error">{fileError}</span>}
+				{fileError && <span className='error'>{fileError}</span>}
 				{selectedFile && (
 					<>
 						<button onClick={startPlayback}>Play</button>
@@ -360,11 +387,12 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 					</>
 				)}
 			</div>
-			<div id="sliders" className="container">
+			<div id='sliders' className='container'>
 				<label>
 					Playback Speed
 					<input
 						type='range'
+						className="slider"
 						step='0.1'
 						min='0'
 						max='2.0'
@@ -376,6 +404,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 					Distortion
 					<input
 						type='range'
+						className="slider"
 						step='0.01'
 						min='0'
 						max='1'
@@ -388,6 +417,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 					Volume
 					<input
 						type='range'
+						className="slider"
 						step='1'
 						min='-20'
 						max='20'
@@ -399,6 +429,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 					Lowpass
 					<input
 						type='range'
+						className="slider"
 						step='2'
 						min='10'
 						max='20000'
@@ -410,6 +441,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 					Highpass
 					<input
 						type='range'
+						className="slider"
 						step='2'
 						min='10'
 						max='20000'
@@ -419,12 +451,13 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 				</label>
 				<label>
 					Loop
-					<input type='checkbox' checked={loop} onChange={toggleLoop} />
+					<Toggle2 check={check} isChecked={isChecked} />
 				</label>
 				<label>
 					Decay
 					<input
 						type='range'
+						className="slider"
 						min='0'
 						step='0.1'
 						max='10'
@@ -436,6 +469,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 					Wetness
 					<input
 						type='range'
+						className="slider"
 						min='0'
 						max='1'
 						step='0.01'
@@ -447,6 +481,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 					Pre Delay
 					<input
 						type='range'
+						className="slider"
 						min='0'
 						max='1'
 						step='0.01'
@@ -456,16 +491,13 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 				</label>
 				<label>
 					Ping Pong
-					<input
-						type='checkbox'
-						checked={check}
-						onChange={(e) => isChecked()}
-					></input>
+					<Toggle loop={loop} toggleLoop={toggleLoop} />
 				</label>
 				<label>
 					Stereo Widener
 					<input
 						type='range'
+						className="slider"
 						step='0.1'
 						min='0.0'
 						max='1.0'
@@ -477,6 +509,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 					Seek
 					<input
 						type='range'
+						className="slider"
 						step='0.1'
 						min='0'
 						max={player.loaded ? player.buffer.duration : 0}
