@@ -14,8 +14,8 @@
     --c-button-disabled-color: #4F526A;
     --c-button-disabled-bg: #6A6F91;
 
-
-    font-family: 'Times New Roman', Times, serif;
+    /* font-family: 'Times New Roman', Times, serif; */
+    font-family: "Comics Sans MS", "Comic Sans", cursive;
     color: var(--c-text);
     background-color: var(--c-bg);
 
