@@ -2,15 +2,15 @@ import React from "react";
 import "./Toggle.css";
 
 interface ToggleProps {
-	loop: boolean;
-	toggleLoop: () => void;
+	isChecked: boolean;
+	toggleChecked: () => void;
 }
 
-const Toggle: React.FC<ToggleProps> = ({ loop, toggleLoop }) => {
+const Toggle: React.FC<ToggleProps> = ({ isChecked, toggleChecked }) => {
 	return (
-		<div className='Toggle-Container' onClick={toggleLoop}>
-			<div className={`toggle-btn ${!loop ? 'disabled' : ''}`}>
-				{loop ? "ON" : "OFF"}
+		<div className='Toggle-Container' onClick={toggleChecked}>
+			<div className={`toggle-btn ${!isChecked ? 'disabled' : ''}`}>
+				{isChecked ? "ON" : "OFF"}
 			</div>
 		</div>
 	);
