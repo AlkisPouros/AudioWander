@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Drumkit } from './drumkit/Drumkit';
+import { Header } from './Header';
 import { ModularSynthesizer } from './synthesizer/ModularSynthesizer';
 import { Recorder } from './audio/Recorder';
 
@@ -11,6 +12,7 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
+    <Header />
     <Recorder />
     <Drumkit />
     <ModularSynthesizer />
