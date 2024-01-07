@@ -372,6 +372,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 	return (
 		<div id='player'>
 			<div id='audio-file-input' className='container'>
+				<label>Add Audio Sample</label>
 				<input
 					type='file'
 					accept='audio/*'

@@ -10,7 +10,7 @@
     }
 
     & #sliders {
-        width: fit-content;
+        width: 70%;
 
         display: flex;
         flex-direction: row;
@@ -24,10 +24,31 @@
             align-items: center;
         }
 
-        & input[type="range"] {
-            appearance: slider-vertical;
-            width: 50px;
-            opacity: 0.7;
-        }
+        & .slider {
+            -webkit-appearance: none;  /* Override default CSS styles */
+            appearance: none;
+            width: 100%; /* Full-width */
+            height: 15px; /* Specified height */
+            background: #d3d3d3; /* Grey background */
+            outline: none; /* Remove outline */
+            opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+            -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+            transition: opacity .2s;
+            margin-top: 0.5em;
+          }
+          
+          /* Mouse-over effects */
+          & .slider:hover {
+            opacity: 1; /* Fully shown on mouse-over */
+          }
+          
+         & .slider::-webkit-slider-thumb {
+            -webkit-appearance: none; /* Override default look */
+            appearance: none;
+            width: 30px; /* Set a specific slider handle width */
+            height: 25px; /* Slider handle height */
+            background: var(--c-accent); /* Green background */
+            cursor: pointer; /* Cursor on hover */
+          }
     }
 }
