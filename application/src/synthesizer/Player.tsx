@@ -3,7 +3,6 @@ import * as Tone from "tone";
 import { Decibels, NormalRange } from "tone/build/esm/core/type/Units";
 import Audio from "./Audio";
 import { Toggle } from "./Toggle";
-import { Toggle2 } from "./Toggle2";
 import "./Player.css";
 import { RecorderProxy } from "../audio/Recorder";
 
@@ -451,7 +450,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 				</label>
 				<label>
 					Loop
-					<Toggle2 check={check} isChecked={isChecked} />
+					<Toggle isChecked={check} toggleChecked={isChecked} />
 				</label>
 				<label>
 					Decay
@@ -491,7 +490,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 				</label>
 				<label>
 					Ping Pong
-					<Toggle loop={loop} toggleLoop={toggleLoop} />
+					<Toggle isChecked={loop} toggleChecked={toggleLoop} />
 				</label>
 				<label>
 					Stereo Widener

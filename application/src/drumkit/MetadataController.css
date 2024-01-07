@@ -24,9 +24,9 @@
 
     font-size: 2em;
 
-    --c-bg-normal: #0F325C;
-    --c-bg-hover: #0F3C5C;
-    --c-bg-click: #0F4E5C;
+    --c-bg-normal: #5c0f56;
+    --c-bg-hover: #5d3454;
+    --c-bg-click: #830887;
 
     --c-bg: var(--c-bg-normal);
     background-color: var(--c-bg);
