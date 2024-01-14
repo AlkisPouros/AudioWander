@@ -3,6 +3,7 @@ import * as Tone from "tone";
 import { Decibels, NormalRange } from "tone/build/esm/core/type/Units";
 import Audio from "./Audio";
 import { Toggle } from "./Toggle";
+import { Toggle2 } from "./Toggle2";
 import "./Player.css";
 import { RecorderProxy } from "../audio/Recorder";
 
@@ -26,7 +27,20 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 	 * */
 
 	const fileInputRef = useRef<HTMLInputElement>(null);
-	const {player,dist,filter,HighpassFilter,reverb,ping_pong,analyser,stereoWidener,sfx_player1,sfx_player2,sfx_player3,sfx_player4,} = Audio;
+	const {
+		player,
+		dist,
+		filter,
+		HighpassFilter,
+		reverb,
+		ping_pong,
+		analyser,
+		stereoWidener,
+		sfx_player1,
+		sfx_player2,
+		sfx_player3,
+		sfx_player4,
+	} = Audio;
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [playbackRate, setPlaybackRate] = useState(1);
 	const [distortion, setValue] = useState(0);
@@ -276,9 +290,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 	};
 	// Change the decay value
 	const changeDecayValue = (decay_value: number) => {
-		try{
-
-		
+		try {
 			setDecayValue(decay_value);
 			if (reverb) {
 				reverb.decay = decay_value;
@@ -288,8 +300,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 			} else {
 				player.disconnect(reverb);
 			}
-		}catch(error)
-		{
+		} catch (error) {
 			console.log("error");
 		}
 	};
@@ -392,7 +403,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 					Playback Speed
 					<input
 						type='range'
-						className="slider"
+						className='slider'
 						step='0.1'
 						min='0'
 						max='2.0'
@@ -404,7 +415,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 					Distortion
 					<input
 						type='range'
-						className="slider"
+						className='slider'
 						step='0.01'
 						min='0'
 						max='1'
@@ -417,7 +428,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 					Volume
 					<input
 						type='range'
-						className="slider"
+						className='slider'
 						step='1'
 						min='-20'
 						max='20'
@@ -429,7 +440,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 					Lowpass
 					<input
 						type='range'
-						className="slider"
+						className='slider'
 						step='2'
 						min='10'
 						max='20000'
@@ -441,7 +452,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 					Highpass
 					<input
 						type='range'
-						className="slider"
+						className='slider'
 						step='2'
 						min='10'
 						max='20000'
@@ -451,13 +462,13 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 				</label>
 				<label>
 					Loop
-					<Toggle isChecked={check} toggleChecked={isChecked} />
+					<Toggle isChecked={loop} toggleChecked={toggleLoop} />
 				</label>
 				<label>
 					Decay
 					<input
 						type='range'
-						className="slider"
+						className='slider'
 						min='0'
 						step='0.1'
 						max='10'
@@ -469,7 +480,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 					Wetness
 					<input
 						type='range'
-						className="slider"
+						className='slider'
 						min='0'
 						max='1'
 						step='0.01'
@@ -481,7 +492,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 					Pre Delay
 					<input
 						type='range'
-						className="slider"
+						className='slider'
 						min='0'
 						max='1'
 						step='0.01'
@@ -491,13 +502,13 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 				</label>
 				<label>
 					Ping Pong
-					<Toggle isChecked={loop} toggleChecked={toggleLoop} />
+					<Toggle2 isChecked={check} toggleChecked={isChecked} />
 				</label>
 				<label>
 					Stereo Widener
 					<input
 						type='range'
-						className="slider"
+						className='slider'
 						step='0.1'
 						min='0.0'
 						max='1.0'
@@ -509,7 +520,7 @@ const Player: React.FC<PlayerProps> = ({ stopPlayersPlayback }) => {
 					Seek
 					<input
 						type='range'
-						className="slider"
+						className='slider'
 						step='0.1'
 						min='0'
 						max={player.loaded ? player.buffer.duration : 0}
